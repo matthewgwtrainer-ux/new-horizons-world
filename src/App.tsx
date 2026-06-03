@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router'
 import LandingPage from './pages/LandingPage'
+import IntroductionPage from './pages/IntroductionPage'
 import WorldPage from './pages/WorldPage'
 import TeacherPage from './pages/TeacherPage'
 
@@ -8,6 +9,7 @@ export default function App() {
     <div className="min-h-screen ocean-gradient">
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/introduction" element={<IntroductionPage />} />
         <Route path="/world/:code" element={<WorldPage />} />
         <Route path="/teacher/:code" element={<TeacherPage />} />
       </Routes>
