@@ -8,12 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Ship, Leaf, Cpu, BookOpen, Send, Scroll, Lightbulb,
-  Newspaper, Activity, RotateCcw
+  Newspaper, Activity
 } from 'lucide-react'
 import {
   staticWorld, staticSectors, staticTeams, staticSessions,
-  staticLogs, staticTemplates, staticReports,
-
+  staticLogs, staticTemplates,
 } from '@/data/staticWorld'
 
 const SECTOR_IMAGES: Record<string, string> = {
@@ -64,9 +63,9 @@ export default function WorldPage() {
     { worldId }, { enabled: !!worldQuery.data }
   )
 
-  // tRPC mutations
+  // tRPC mutations (backend sync — localStorage is primary)
   const submitReportMutation = trpc.report.submit.useMutation({
-    onSuccess: () => { reportsQuery.refetch(); setReportStatus('Report submitted and saved!'); setReportTitle(''); setReportContent(''); setTimeout(() => setReportStatus(''), 3000) }
+    onSuccess: () => { reportsQuery.refetch() }
   })
 
   // Use API data when available, fall back to static
@@ -76,7 +75,19 @@ export default function WorldPage() {
   const sessions = sessionsQuery.data || staticSessions
   const logs = logsQuery.data || staticLogs
   const templates = templatesQuery.data || staticTemplates
-  const allReports = reportsQuery.data || staticReports
+
+  // Reports: merge API data with localStorage for immediate persistence
+  const apiReports = reportsQuery.data || []
+  const [localReports, setLocalReports] = useState<any[]>([])
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('nhw-reports')
+      if (raw) setLocalReports(JSON.parse(raw))
+    } catch { /* ignore */ }
+  }, [])
+  const allReports = [...localReports, ...apiReports].sort((a: any, b: any) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
 
   const currentSession = sessions.find(s => s.sessionId === (world?.currentSession || 1))
 
@@ -88,7 +99,6 @@ export default function WorldPage() {
   const [reportContent, setReportContent] = useState('')
   const [reportStatus, setReportStatus] = useState('')
   const [activeTab, setActiveTab] = useState('dashboard')
-  const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   const selectedSector = sectors.find(s => s.sectorId === selectedSectorId)
   const selectedTeam = teams.find(t => t.teamId === selectedTeamId)
@@ -101,7 +111,9 @@ export default function WorldPage() {
 
   const handleSubmitReport = () => {
     if (!reportTitle || !reportContent) return
-    submitReportMutation.mutate({
+
+    const newReport = {
+      id: Date.now(),
       worldId: world.id,
       sessionId: world.currentSession,
       teamId: selectedTeamId,
@@ -109,7 +121,36 @@ export default function WorldPage() {
       reportType,
       title: reportTitle,
       content: reportContent,
-    })
+      status: 'Submitted',
+      teacherComment: null,
+      createdAt: new Date().toISOString(),
+    }
+
+    // Save to localStorage first (always works, even without backend)
+    const existing = JSON.parse(localStorage.getItem('nhw-reports') || '[]')
+    const updated = [newReport, ...existing]
+    localStorage.setItem('nhw-reports', JSON.stringify(updated))
+    setLocalReports(updated)
+
+    // Also try to sync to backend (if available)
+    try {
+      submitReportMutation.mutate({
+        worldId: world.id,
+        sessionId: world.currentSession,
+        teamId: selectedTeamId,
+        sectorId: selectedSectorId,
+        reportType,
+        title: reportTitle,
+        content: reportContent,
+      })
+    } catch {
+      // Backend not available — localStorage is enough
+    }
+
+    setReportStatus('Report submitted and saved!')
+    setReportTitle('')
+    setReportContent('')
+    setTimeout(() => setReportStatus(''), 3000)
   }
 
   const isLoading = worldQuery.isLoading
@@ -149,13 +190,6 @@ export default function WorldPage() {
           </div>
           <p className="hidden md:block text-sm text-[#a8bfd4] italic">{world.tagline}</p>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowResetConfirm(true)}
-              className="p-2 rounded-lg bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,107,107,0.2)] text-[#a8bfd4] hover:text-[#ff6b6b] transition-all"
-              title="Reset world data"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
             <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
               <SelectTrigger className="w-44 bg-[rgba(16,40,72,0.9)] border-[#48d1cc]/30 text-white text-sm">
                 <SelectValue />
@@ -169,29 +203,6 @@ export default function WorldPage() {
           </div>
         </div>
       </header>
-
-      {/* Reset confirmation */}
-      {showResetConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-          <div className="glass-panel-strong p-6 max-w-sm w-full text-center">
-            <h3 className="text-lg font-bold text-white mb-2">Reset World Data?</h3>
-            <p className="text-sm text-[#a8bfd4] mb-4">
-              This will delete all student reports and log entries. The original world data will be restored.
-            </p>
-            <div className="flex gap-3 justify-center">
-              <Button variant="outline" onClick={() => setShowResetConfirm(false)} className="border-[#48d1cc]/30 text-[#a8bfd4]">
-                Cancel
-              </Button>
-              <Button
-                onClick={() => { localStorage.clear(); window.location.reload() }}
-                className="bg-[#ff6b6b] hover:bg-[#e55a5a] text-white"
-              >
-                Reset Everything
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <main className="max-w-7xl mx-auto p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
