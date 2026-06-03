@@ -7,6 +7,7 @@ import { logRouter } from "./routers/log";
 import { reportRouter } from "./routers/report";
 import { eventRouter } from "./routers/event";
 import { templateRouter } from "./routers/template";
+import { citizenChatRouter } from "./routers/citizenChat";
 
 export const appRouter = createRouter({
   ping: publicQuery.query(() => ({ ok: true, ts: Date.now() })),
@@ -18,6 +19,7 @@ export const appRouter = createRouter({
   report: reportRouter,
   event: eventRouter,
   template: templateRouter,
+  citizenChat: citizenChatRouter,
 });
 
 export type AppRouter = typeof appRouter;

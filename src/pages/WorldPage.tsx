@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router'
 import { trpc } from '@/providers/trpc'
 import { Button } from '@/components/ui/button'
@@ -8,173 +8,194 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Ship, Leaf, Cpu, BookOpen, Send, Scroll, Lightbulb,
-  Newspaper, Activity
+  Newspaper, Activity, MessageCircle, Mic, User, Bot
 } from 'lucide-react'
-import {
-  staticWorld, staticSectors, staticTeams, staticSessions,
-  staticLogs, staticTemplates,
-} from '@/data/staticWorld'
 
 const SECTOR_IMAGES: Record<string, string> = {
-  harbour: '/sector-harbour.jpg',
-  garden: '/sector-garden.jpg',
-  tech: '/sector-tech.jpg',
-  culture: '/sector-culture.jpg',
+  harbour: '/sector-harbour.jpg', garden: '/sector-garden.jpg',
+  tech: '/sector-tech.jpg', culture: '/sector-culture.jpg',
 }
-
 const SECTOR_ICONS: Record<string, React.ElementType> = {
   harbour: Ship, garden: Leaf, tech: Cpu, culture: BookOpen,
 }
-
 const SECTOR_COLORS: Record<string, string> = {
   harbour: '#4a9eff', garden: '#4ade80', tech: '#a78bfa', culture: '#fbbf24',
 }
 
-// Helper: format date nicely
-function fmtDate(d: Date | string) {
-  const date = typeof d === 'string' ? new Date(d) : d
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+const CITIZENS: Record<string, { name: string; role: string }[]> = {
+  harbour: [
+    { name: 'Harbour Manager', role: 'Manages all harbour operations' },
+    { name: 'Ferry Pilot', role: 'Operates the island ferry' },
+    { name: 'Supply Robot', role: 'Handles cargo and inventory' },
+  ],
+  garden: [
+    { name: 'Botanist', role: 'Studies island plants' },
+    { name: 'Water Keeper', role: 'Manages water systems' },
+    { name: 'Animal Helper', role: 'Cares for island animals' },
+  ],
+  tech: [
+    { name: 'Engineer', role: 'Maintains island technology' },
+    { name: 'Repair Robot', role: 'Fixes broken equipment' },
+    { name: 'Signal Officer', role: 'Monitors communications' },
+  ],
+  culture: [
+    { name: 'Archivist', role: 'Keeps island records' },
+    { name: 'Young Reporter', role: 'Writes island news' },
+    { name: 'Council Guide', role: 'Helps visitors and citizens' },
+  ],
+}
+
+interface ChatMessage {
+  id: number
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: string
 }
 
 export default function WorldPage() {
   const { code } = useParams<{ code: string }>()
   const safeCode = code || 'NHI2026'
 
-  // tRPC queries (with static fallback on error/loading)
+  // tRPC queries
   const worldQuery = trpc.world.getByCode.useQuery({ code: safeCode })
-  const worldId = worldQuery.data?.id || staticWorld.id
+  const worldId = worldQuery.data?.id || 1
 
-  const sectorsQuery = trpc.sector.listByWorld.useQuery(
-    { worldId }, { enabled: !!worldQuery.data }
-  )
-  const teamsQuery = trpc.team.listByWorld.useQuery(
-    { worldId }, { enabled: !!worldQuery.data }
-  )
-  const sessionsQuery = trpc.session.listByWorld.useQuery(
-    { worldId }, { enabled: !!worldQuery.data }
-  )
-  const logsQuery = trpc.log.listByWorld.useQuery(
-    { worldId }, { enabled: !!worldQuery.data }
-  )
-  const templatesQuery = trpc.template.listByWorld.useQuery(
-    { worldId }, { enabled: !!worldQuery.data }
-  )
-  const reportsQuery = trpc.report.listByWorld.useQuery(
-    { worldId }, { enabled: !!worldQuery.data }
-  )
+  const sectorsQuery = trpc.sector.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
+  const teamsQuery = trpc.team.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
+  const sessionsQuery = trpc.session.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
+  const logsQuery = trpc.log.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
+  const templatesQuery = trpc.template.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
+  const reportsQuery = trpc.report.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
 
-  // tRPC mutations (backend sync — localStorage is primary)
-  const submitReportMutation = trpc.report.submit.useMutation({
-    onSuccess: () => { reportsQuery.refetch() }
-  })
+  // tRPC mutations
+  const submitReportMutation = trpc.report.submit.useMutation({ onSuccess: () => reportsQuery.refetch() })
+  const chatMutation = trpc.citizenChat.chat.useMutation()
 
-  // Use API data when available, fall back to static
-  const world = worldQuery.data || staticWorld
-  const sectors = sectorsQuery.data || staticSectors
-  const teams = teamsQuery.data || staticTeams
-  const sessions = sessionsQuery.data || staticSessions
-  const logs = logsQuery.data || staticLogs
-  const templates = templatesQuery.data || staticTemplates
-
-  // Reports: merge API data with localStorage for immediate persistence
+  // Data (API preferred, static fallback)
+  const world = worldQuery.data || { id: 1, name: 'New Horizon Island', code: 'NHI2026', tagline: 'Can our English make an AI world come alive?', currentSession: 1, teacherPasscode: 'worldcouncil', mode: 'TEST' }
+  const sectors = sectorsQuery.data || []
+  const teams = teamsQuery.data || []
+  const sessions = sessionsQuery.data || []
+  const logs = logsQuery.data || []
+  const templates = templatesQuery.data || []
   const apiReports = reportsQuery.data || []
+
+  // Local reports merged with API
   const [localReports, setLocalReports] = useState<any[]>([])
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('nhw-reports')
-      if (raw) setLocalReports(JSON.parse(raw))
-    } catch { /* ignore */ }
-  }, [])
-  const allReports = [...localReports, ...apiReports].sort((a: any, b: any) =>
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
+  useEffect(() => { try { const r = localStorage.getItem('nhw-reports'); if (r) setLocalReports(JSON.parse(r)) } catch {} }, [])
+  const allReports = [...localReports, ...apiReports].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
-  const currentSession = sessions.find(s => s.sessionId === (world?.currentSession || 1))
+  const currentSession = sessions.find((s: any) => s.sessionId === (world?.currentSession || 1))
 
-  // Local state
-  const [selectedSectorId, setSelectedSectorId] = useState<string>('harbour')
-  const [selectedTeamId, setSelectedTeamId] = useState<string>('T1')
+  // UI State
+  const [selectedSectorId, setSelectedSectorId] = useState('harbour')
+  const [selectedTeamId, setSelectedTeamId] = useState('T1')
+  const [activeTab, setActiveTab] = useState('dashboard')
+
+  // Report state
   const [reportTitle, setReportTitle] = useState('')
   const [reportType, setReportType] = useState('Discovery Report')
   const [reportContent, setReportContent] = useState('')
   const [reportStatus, setReportStatus] = useState('')
-  const [activeTab, setActiveTab] = useState('dashboard')
 
-  const selectedSector = sectors.find(s => s.sectorId === selectedSectorId)
-  const selectedTeam = teams.find(t => t.teamId === selectedTeamId)
+  // Chat state
+  const [selectedCitizen, setSelectedCitizen] = useState('Harbour Manager')
+  const [chatInput, setChatInput] = useState('')
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+  const [isChatLoading, setIsChatLoading] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const chatEndRef = useRef<HTMLDivElement>(null)
 
-  // Sync sector when team changes
+  // Load chat history from localStorage
   useEffect(() => {
-    const team = teams.find(t => t.teamId === selectedTeamId)
+    try {
+      const key = `nhw-chat-${safeCode}-${selectedCitizen}`
+      const saved = localStorage.getItem(key)
+      if (saved) setChatMessages(JSON.parse(saved))
+      else setChatMessages([])
+    } catch { setChatMessages([]) }
+  }, [selectedCitizen, safeCode])
+
+  // Save chat history
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      const key = `nhw-chat-${safeCode}-${selectedCitizen}`
+      localStorage.setItem(key, JSON.stringify(chatMessages))
+    }
+  }, [chatMessages, selectedCitizen, safeCode])
+
+  // Scroll to bottom of chat
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMessages])
+
+  // Sync team→sector
+  useEffect(() => {
+    const team = teams.find((t: any) => t.teamId === selectedTeamId)
     if (team) setSelectedSectorId(team.sectorId)
   }, [selectedTeamId, teams])
 
+  const selectedSector = sectors.find((s: any) => s.sectorId === selectedSectorId)
+  const selectedTeam = teams.find((t: any) => t.teamId === selectedTeamId)
+  const sectorCitizens = CITIZENS[selectedSectorId] || []
+
   const handleSubmitReport = () => {
     if (!reportTitle || !reportContent) return
-
-    const newReport = {
-      id: Date.now(),
-      worldId: world.id,
-      sessionId: world.currentSession,
-      teamId: selectedTeamId,
-      sectorId: selectedSectorId,
-      reportType,
-      title: reportTitle,
-      content: reportContent,
-      status: 'Submitted',
-      teacherComment: null,
-      createdAt: new Date().toISOString(),
-    }
-
-    // Save to localStorage first (always works, even without backend)
+    const newReport = { id: Date.now(), worldId: world.id, sessionId: world.currentSession, teamId: selectedTeamId, sectorId: selectedSectorId, reportType, title: reportTitle, content: reportContent, status: 'Submitted', teacherComment: null, createdAt: new Date().toISOString() }
     const existing = JSON.parse(localStorage.getItem('nhw-reports') || '[]')
     const updated = [newReport, ...existing]
     localStorage.setItem('nhw-reports', JSON.stringify(updated))
     setLocalReports(updated)
-
-    // Also try to sync to backend (if available)
-    try {
-      submitReportMutation.mutate({
-        worldId: world.id,
-        sessionId: world.currentSession,
-        teamId: selectedTeamId,
-        sectorId: selectedSectorId,
-        reportType,
-        title: reportTitle,
-        content: reportContent,
-      })
-    } catch {
-      // Backend not available — localStorage is enough
-    }
-
+    try { submitReportMutation.mutate({ worldId: world.id, sessionId: world.currentSession, teamId: selectedTeamId, sectorId: selectedSectorId, reportType, title: reportTitle, content: reportContent }) } catch {}
     setReportStatus('Report submitted and saved!')
-    setReportTitle('')
-    setReportContent('')
+    setReportTitle(''); setReportContent('')
     setTimeout(() => setReportStatus(''), 3000)
   }
 
-  const isLoading = worldQuery.isLoading
+  const handleSendChat = async () => {
+    if (!chatInput.trim() || !selectedSector || isChatLoading) return
+    const userMsg: ChatMessage = { id: Date.now(), role: 'user', content: chatInput.trim(), timestamp: new Date().toISOString() }
+    setChatMessages(prev => [...prev, userMsg])
+    setChatInput('')
+    setIsChatLoading(true)
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center ocean-gradient">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#48d1cc] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[#a8bfd4]">Loading New Horizon Island...</p>
-        </div>
-      </div>
-    )
+    try {
+      const recentLogs = logs.slice(0, 5).map((l: any) => l.entry).join('\n')
+      const result = await chatMutation.mutateAsync({
+        citizenName: selectedCitizen,
+        sectorName: selectedSector.name,
+        sectorResponsibility: selectedSector.responsibility || '',
+        currentProblem: selectedSector.currentProblem || '',
+        mystery: selectedSector.mystery || '',
+        teamName: selectedTeam?.name || 'World Council Team',
+        studentMessage: userMsg.content,
+        recentLogs,
+        sessionTitle: currentSession?.title,
+      })
+
+      const botMsg: ChatMessage = {
+        id: Date.now() + 1,
+        role: 'assistant',
+        content: result.response || "I'm having trouble responding right now. Please try again.",
+        timestamp: new Date().toISOString(),
+      }
+      setChatMessages(prev => [...prev, botMsg])
+    } catch {
+      const botMsg: ChatMessage = { id: Date.now() + 1, role: 'assistant', content: "I'm having trouble connecting. Please check your internet and try again.", timestamp: new Date().toISOString() }
+      setChatMessages(prev => [...prev, botMsg])
+    } finally {
+      setIsChatLoading(false)
+    }
   }
 
-  if (!world) {
-    return (
-      <div className="min-h-screen flex items-center justify-center ocean-gradient">
-        <div className="glass-panel p-8 text-center">
-          <h2 className="text-2xl font-bold text-white mb-2">World Not Found</h2>
-          <p className="text-[#a8bfd4]">The world code &quot;{safeCode}&quot; does not exist.</p>
-        </div>
-      </div>
-    )
+  const startVoice = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SR) { alert('Voice input not supported. Try Chrome or Safari.') }
+    const rec = new SR()
+    rec.lang = 'en-US'
+    rec.onstart = () => setIsListening(true)
+    rec.onend = () => setIsListening(false)
+    rec.onresult = (e: any) => { const t = e.results[0][0].transcript; setChatInput(prev => prev ? prev + ' ' + t : t) }
+    rec.onerror = () => setIsListening(false)
+    rec.start()
   }
 
   return (
@@ -184,31 +205,28 @@ export default function WorldPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-xl md:text-2xl font-bold text-white">{world.name}</h1>
-            <span className="text-xs text-[#48d1cc] bg-[#48d1cc]/10 px-2 py-1 rounded-full border border-[#48d1cc]/30">
-              Session {world.currentSession}
-            </span>
+            <span className="text-xs text-[#48d1cc] bg-[#48d1cc]/10 px-2 py-1 rounded-full border border-[#48d1cc]/30">Session {world.currentSession}</span>
           </div>
           <p className="hidden md:block text-sm text-[#a8bfd4] italic">{world.tagline}</p>
-          <div className="flex items-center gap-2">
-            <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
-              <SelectTrigger className="w-44 bg-[rgba(16,40,72,0.9)] border-[#48d1cc]/30 text-white text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-[#102848]">
-                {teams.map(t => (
-                  <SelectItem key={t.teamId} value={t.teamId} className="text-white">{t.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
+            <SelectTrigger className="w-44 bg-[rgba(16,40,72,0.9)] border-[#48d1cc]/30 text-white text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#102848]">
+              {teams.map((t: any) => <SelectItem key={t.teamId} value={t.teamId} className="text-white">{t.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="bg-[rgba(16,40,72,0.9)] border border-[#48d1cc]/20 mb-4 h-auto">
+          <TabsList className="bg-[rgba(16,40,72,0.9)] border border-[#48d1cc]/20 mb-4 h-auto flex-wrap gap-1">
             <TabsTrigger value="dashboard" className="text-[#a8bfd4] data-[state=active]:bg-[#48d1cc] data-[state=active]:text-[#0a1628]">
               <Activity className="w-4 h-4 mr-1" /> Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="citizens" className="text-[#a8bfd4] data-[state=active]:bg-[#48d1cc] data-[state=active]:text-[#0a1628]">
+              <MessageCircle className="w-4 h-4 mr-1" /> Talk to Citizens
             </TabsTrigger>
             <TabsTrigger value="newsroom" className="text-[#a8bfd4] data-[state=active]:bg-[#48d1cc] data-[state=active]:text-[#0a1628]">
               <Newspaper className="w-4 h-4 mr-1" /> Newsroom
@@ -220,24 +238,14 @@ export default function WorldPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Sectors */}
               <div className="glass-panel p-4 md:col-span-1">
-                <h2 className="text-lg font-bold text-[#48d1cc] mb-3 flex items-center gap-2">
-                  <Scroll className="w-5 h-5" /> Island Sectors
-                </h2>
+                <h2 className="text-lg font-bold text-[#48d1cc] mb-3 flex items-center gap-2"><Scroll className="w-5 h-5" /> Island Sectors</h2>
                 <div className="space-y-2">
-                  {sectors.map(sector => {
+                  {sectors.map((sector: any) => {
                     const Icon = SECTOR_ICONS[sector.sectorId] || Ship
-                    const color = SECTOR_COLORS[sector.sectorId] || '#48d1cc'
                     return (
-                      <button
-                        key={sector.sectorId}
-                        onClick={() => setSelectedSectorId(sector.sectorId)}
-                        className={`sector-card w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3 ${
-                          selectedSectorId === sector.sectorId
-                            ? 'border-[#48d1cc] bg-[rgba(72,209,204,0.12)]'
-                            : 'border-[rgba(75,130,180,0.25)] hover:border-[#48d1cc]/50'
-                        }`}
-                      >
-                        <Icon className="w-5 h-5 flex-shrink-0" style={{ color }} />
+                      <button key={sector.sectorId} onClick={() => setSelectedSectorId(sector.sectorId)}
+                        className={`sector-card w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3 ${selectedSectorId === sector.sectorId ? 'border-[#48d1cc] bg-[rgba(72,209,204,0.12)]' : 'border-[rgba(75,130,180,0.25)] hover:border-[#48d1cc]/50'}`}>
+                        <Icon className="w-5 h-5 flex-shrink-0" style={{ color: SECTOR_COLORS[sector.sectorId] || '#48d1cc' }} />
                         <span className="text-white font-medium text-sm">{sector.name}</span>
                       </button>
                     )
@@ -252,19 +260,13 @@ export default function WorldPage() {
 
               {/* Mission */}
               <div className="glass-panel p-4 md:col-span-1">
-                <h2 className="text-lg font-bold text-[#48d1cc] mb-3 flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5" /> Mission
-                </h2>
+                <h2 className="text-lg font-bold text-[#48d1cc] mb-3 flex items-center gap-2"><Lightbulb className="w-5 h-5" /> Mission</h2>
                 {currentSession ? (
                   <div className="space-y-3">
                     <h3 className="text-white font-bold text-base">{currentSession.title}</h3>
                     <p className="text-sm text-[#a8bfd4] leading-relaxed">{currentSession.worldUpdate}</p>
-                    <div className="border-l-2 border-[#ffd166] pl-3 py-1">
-                      <p className="text-sm"><span className="text-[#ffd166] font-bold">Problem:</span> <span className="text-[#eef6ff]">{currentSession.mainProblem}</span></p>
-                    </div>
-                    <div className="border-l-2 border-[#48d1cc] pl-3 py-1">
-                      <p className="text-sm"><span className="text-[#48d1cc] font-bold">Your Task:</span> <span className="text-[#eef6ff]">{currentSession.teamTask}</span></p>
-                    </div>
+                    <div className="border-l-2 border-[#ffd166] pl-3 py-1"><p className="text-sm"><span className="text-[#ffd166] font-bold">Problem:</span> <span className="text-[#eef6ff]">{currentSession.mainProblem}</span></p></div>
+                    <div className="border-l-2 border-[#48d1cc] pl-3 py-1"><p className="text-sm"><span className="text-[#48d1cc] font-bold">Your Task:</span> <span className="text-[#eef6ff]">{currentSession.teamTask}</span></p></div>
                   </div>
                 ) : <p className="text-[#a8bfd4]">Loading mission...</p>}
               </div>
@@ -273,7 +275,7 @@ export default function WorldPage() {
               <div className="glass-panel p-4 md:col-span-1">
                 <h2 className="text-lg font-bold text-[#48d1cc] mb-3">English Help</h2>
                 <div className="space-y-2 max-h-80 overflow-y-auto">
-                  {templates.map(t => (
+                  {templates.map((t: any) => (
                     <div key={t.templateId} className="bg-[rgba(255,255,255,0.04)] rounded-lg p-3">
                       <span className="text-xs text-[#ffd166] font-bold uppercase tracking-wide">{t.category}</span>
                       <p className="text-sm text-white mt-1">{t.sentenceStarter}</p>
@@ -287,24 +289,11 @@ export default function WorldPage() {
               <div className="glass-panel p-4 md:col-span-3">
                 <h2 className="text-lg font-bold text-[#48d1cc] mb-4">{selectedSector?.name} Details</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {[
-                    { label: 'Responsibility', value: selectedSector?.responsibility },
-                    { label: 'Locations', value: selectedSector?.locations },
-                    { label: 'Citizens', value: selectedSector?.citizens },
-                  ].map(item => (
-                    <div key={item.label} className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3">
-                      <span className="text-xs text-[#a8bfd4] uppercase tracking-wide">{item.label}</span>
-                      <p className="text-sm text-white mt-1">{item.value}</p>
-                    </div>
-                  ))}
-                  <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3 sm:col-span-2">
-                    <span className="text-xs text-[#a8bfd4] uppercase tracking-wide">Current Problem</span>
-                    <p className="text-sm text-[#ffd166] mt-1 font-medium">{selectedSector?.currentProblem}</p>
-                  </div>
-                  <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3">
-                    <span className="text-xs text-[#a8bfd4] uppercase tracking-wide">Mystery</span>
-                    <p className="text-sm text-[#a78bfa] mt-1 font-medium">{selectedSector?.mystery}</p>
-                  </div>
+                  <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3"><span className="text-xs text-[#a8bfd4] uppercase">Responsibility</span><p className="text-sm text-white mt-1">{selectedSector?.responsibility}</p></div>
+                  <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3"><span className="text-xs text-[#a8bfd4] uppercase">Locations</span><p className="text-sm text-white mt-1">{selectedSector?.locations}</p></div>
+                  <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3"><span className="text-xs text-[#a8bfd4] uppercase">Citizens</span><p className="text-sm text-white mt-1">{selectedSector?.citizens}</p></div>
+                  <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3 sm:col-span-2"><span className="text-xs text-[#a8bfd4] uppercase">Current Problem</span><p className="text-sm text-[#ffd166] mt-1 font-medium">{selectedSector?.currentProblem}</p></div>
+                  <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3"><span className="text-xs text-[#a8bfd4] uppercase">Mystery</span><p className="text-sm text-[#a78bfa] mt-1 font-medium">{selectedSector?.mystery}</p></div>
                 </div>
               </div>
 
@@ -314,11 +303,7 @@ export default function WorldPage() {
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {logs.length > 0 ? logs.slice(0, 10).map((log: any) => (
                     <div key={log.id} className="border-l-2 border-[#48d1cc] pl-3 py-2 bg-[rgba(255,255,255,0.03)] rounded-r-lg">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs text-[#48d1cc] font-bold">{log.type}</span>
-                        <span className="text-xs text-[#a8bfd4]">[{log.sectorId}]</span>
-                        <span className="text-xs text-[#a8bfd4]/50 ml-auto">{log.addedBy}</span>
-                      </div>
+                      <div className="flex items-center gap-2 flex-wrap"><span className="text-xs text-[#48d1cc] font-bold">{log.type}</span><span className="text-xs text-[#a8bfd4]">[{log.sectorId}]</span><span className="text-xs text-[#a8bfd4]/50 ml-auto">{log.addedBy}</span></div>
                       <p className="text-sm text-white mt-1">{log.entry}</p>
                     </div>
                   )) : <p className="text-[#a8bfd4] text-sm">No events yet.</p>}
@@ -330,20 +315,127 @@ export default function WorldPage() {
                 <h2 className="text-lg font-bold text-[#48d1cc] mb-3">Your Team</h2>
                 {selectedTeam && (
                   <div className="space-y-3">
-                    <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3">
-                      <span className="text-xs text-[#a8bfd4] uppercase tracking-wide">Team</span>
-                      <p className="text-white font-bold">{selectedTeam.name}</p>
-                    </div>
-                    <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3">
-                      <span className="text-xs text-[#a8bfd4] uppercase tracking-wide">Sector</span>
-                      <p className="text-sm text-white">{sectors.find(s => s.sectorId === selectedTeam.sectorId)?.name}</p>
-                    </div>
-                    <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3">
-                      <span className="text-xs text-[#a8bfd4] uppercase tracking-wide">Current Task</span>
-                      <p className="text-sm text-[#ffd166]">{selectedTeam.currentTask}</p>
-                    </div>
+                    <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3"><span className="text-xs text-[#a8bfd4] uppercase">Team</span><p className="text-white font-bold">{selectedTeam.name}</p></div>
+                    <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3"><span className="text-xs text-[#a8bfd4] uppercase">Sector</span><p className="text-sm text-white">{sectors.find((s: any) => s.sectorId === selectedTeam.sectorId)?.name}</p></div>
+                    <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3"><span className="text-xs text-[#a8bfd4] uppercase">Current Task</span><p className="text-sm text-[#ffd166]">{selectedTeam.currentTask}</p></div>
                   </div>
                 )}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* TALK TO CITIZENS TAB */}
+          <TabsContent value="citizens" className="animate-fade-in">
+            <div className="max-w-3xl mx-auto">
+              <div className="glass-panel p-4 md:p-6">
+                {/* Citizen Selector */}
+                <div className="mb-4">
+                  <h2 className="text-lg font-bold text-[#48d1cc] mb-3 flex items-center gap-2"><MessageCircle className="w-5 h-5" /> Talk to a Citizen</h2>
+                  <div className="grid grid-cols-3 gap-2">
+                    {sectorCitizens.map(citizen => (
+                      <button
+                        key={citizen.name}
+                        onClick={() => { setSelectedCitizen(citizen.name); setChatMessages([]) }}
+                        className={`p-3 rounded-lg border text-left transition-all ${
+                          selectedCitizen === citizen.name
+                            ? 'border-[#48d1cc] bg-[rgba(72,209,204,0.12)]'
+                            : 'border-[rgba(75,130,180,0.25)] hover:border-[#48d1cc]/50 bg-[rgba(255,255,255,0.03)]'
+                        }`}
+                      >
+                        <User className="w-4 h-4 text-[#48d1cc] mb-1" />
+                        <p className="text-sm text-white font-medium">{citizen.name}</p>
+                        <p className="text-xs text-[#a8bfd4]">{citizen.role}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Chat Window */}
+                <div className="bg-[rgba(8,22,36,0.9)] rounded-xl border border-[#48d1cc]/20 mb-4">
+                  {/* Chat Header */}
+                  <div className="px-4 py-2 border-b border-[#48d1cc]/10 flex items-center gap-2">
+                    <Bot className="w-4 h-4 text-[#48d1cc]" />
+                    <span className="text-sm text-white font-medium">{selectedCitizen}</span>
+                    <span className="text-xs text-[#a8bfd4] ml-auto">{selectedSector?.name}</span>
+                  </div>
+
+                  {/* Messages */}
+                  <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto min-h-[200px]">
+                    {chatMessages.length === 0 && (
+                      <div className="text-center py-8 text-[#a8bfd4]">
+                        <Bot className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                        <p className="text-sm">Start a conversation with {selectedCitizen}!</p>
+                        <p className="text-xs mt-1 opacity-60">Ask about the mystery in your sector.</p>
+                      </div>
+                    )}
+                    {chatMessages.map((msg) => (
+                      <div key={msg.id} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        {msg.role === 'assistant' && <Bot className="w-5 h-5 text-[#48d1cc] flex-shrink-0 mt-1" />}
+                        <div className={`max-w-[75%] px-3 py-2 rounded-xl text-sm ${
+                          msg.role === 'user'
+                            ? 'bg-[#48d1cc] text-[#0a1628] rounded-br-sm'
+                            : 'bg-[rgba(255,255,255,0.08)] text-white border border-[rgba(75,130,180,0.2)] rounded-bl-sm'
+                        }`}>
+                          {msg.content}
+                        </div>
+                        {msg.role === 'user' && <User className="w-5 h-5 text-[#ffd166] flex-shrink-0 mt-1" />}
+                      </div>
+                    ))}
+                    {isChatLoading && (
+                      <div className="flex gap-2 items-center">
+                        <Bot className="w-5 h-5 text-[#48d1cc]" />
+                        <div className="bg-[rgba(255,255,255,0.08)] px-3 py-2 rounded-xl border border-[rgba(75,130,180,0.2)]">
+                          <div className="flex gap-1">
+                            <div className="w-2 h-2 bg-[#48d1cc] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-2 h-2 bg-[#48d1cc] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <div className="w-2 h-2 bg-[#48d1cc] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={chatEndRef} />
+                  </div>
+
+                  {/* Input */}
+                  <div className="p-3 border-t border-[#48d1cc]/10 flex gap-2">
+                    <div className="flex-1 relative">
+                      <input
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
+                        placeholder={`Ask ${selectedCitizen} a question...`}
+                        className="w-full bg-[rgba(16,40,72,0.9)] border border-[#48d1cc]/20 rounded-lg px-3 py-2.5 text-white text-sm placeholder:text-[#a8bfd4]/50 pr-10"
+                      />
+                      <button
+                        onClick={startVoice}
+                        className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'text-[#a8bfd4] hover:text-[#48d1cc]'}`}
+                      >
+                        <Mic className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <Button onClick={handleSendChat} disabled={isChatLoading || !chatInput.trim()} className="bg-[#48d1cc] hover:bg-[#3bc4bf] text-[#0a1628] font-bold px-4">
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Quick starters */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {[
+                    `Hello ${selectedCitizen}, what do you know about the mystery?`,
+                    `Why is there a problem in the ${selectedSector?.name}?`,
+                    `Have you seen anything strange lately?`,
+                    `What should our team investigate first?`,
+                  ].map((starter, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setChatInput(starter)}
+                      className="text-left p-2 rounded-lg bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(72,209,204,0.12)] border border-transparent hover:border-[#48d1cc]/30 transition-all text-xs text-[#a8bfd4] hover:text-white"
+                    >
+                      {starter}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -351,7 +443,6 @@ export default function WorldPage() {
           {/* NEWSROOM TAB */}
           <TabsContent value="newsroom" className="animate-fade-in">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Report Editor */}
               <div className="glass-panel p-4">
                 <h2 className="text-lg font-bold text-[#48d1cc] mb-4">Submit a Report</h2>
                 <div className="space-y-4">
@@ -381,7 +472,6 @@ export default function WorldPage() {
                 </div>
               </div>
 
-              {/* Submitted Reports */}
               <div className="glass-panel p-4">
                 <h2 className="text-lg font-bold text-[#48d1cc] mb-4">Team Reports ({allReports.length})</h2>
                 <div className="space-y-3 max-h-[550px] overflow-y-auto">
@@ -389,16 +479,11 @@ export default function WorldPage() {
                     <div key={report.id} className="bg-[rgba(255,255,255,0.04)] rounded-lg p-3 border-l-2 border-[#48d1cc]">
                       <div className="flex justify-between items-start gap-2">
                         <span className="text-xs text-[#ffd166] font-bold">{report.reportType}</span>
-                        <span className="text-xs text-[#a8bfd4] text-right">{teams.find(t => t.teamId === report.teamId)?.name}</span>
+                        <span className="text-xs text-[#a8bfd4] text-right">{teams.find((t: any) => t.teamId === report.teamId)?.name}</span>
                       </div>
                       <h4 className="text-white font-bold text-sm mt-1">{report.title}</h4>
                       <p className="text-sm text-[#a8bfd4] mt-1">{report.content}</p>
-                      {report.teacherComment && (
-                        <div className="mt-2 p-2 bg-[rgba(74,222,128,0.1)] rounded border border-[#4ade80]/30">
-                          <span className="text-xs text-[#4ade80]">Teacher: {report.teacherComment}</span>
-                        </div>
-                      )}
-                      <span className="text-xs text-[#a8bfd4]/40 mt-1 block">{fmtDate(report.createdAt)}</span>
+                      {report.teacherComment && <div className="mt-2 p-2 bg-[rgba(74,222,128,0.1)] rounded border border-[#4ade80]/30"><span className="text-xs text-[#4ade80]">Teacher: {report.teacherComment}</span></div>}
                     </div>
                   )) : (
                     <div className="text-center py-12 text-[#a8bfd4]">
