@@ -8,8 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Ship, Leaf, Cpu, BookOpen, Send, Scroll, Lightbulb,
-  Newspaper, Activity, MessageCircle, Mic, User, Bot
+  Newspaper, Activity, MessageCircle, Mic, User, Bot,
+  WifiOff
 } from 'lucide-react'
+import {
+  staticWorld, staticSectors, staticTeams, staticSessions,
+  staticLogs, staticTemplates,
+} from '@/data/staticWorld'
 
 const SECTOR_IMAGES: Record<string, string> = {
   harbour: '/sector-harbour.jpg', garden: '/sector-garden.jpg',
@@ -45,6 +50,8 @@ const CITIZENS: Record<string, { name: string; role: string }[]> = {
   ],
 }
 
+const KIMI_API_KEY = 'sk-lUGKRBJHjb06BtSDtwt1pCYDr4HjZtue3uagyBfl9Glmzl5Y'
+
 interface ChatMessage {
   id: number
   role: 'user' | 'assistant'
@@ -52,38 +59,49 @@ interface ChatMessage {
   timestamp: string
 }
 
+// Use static data as primary source (works without backend)
+function useStaticData() {
+  return {
+    world: staticWorld,
+    sectors: staticSectors,
+    teams: staticTeams,
+    sessions: staticSessions,
+    logs: staticLogs,
+    templates: staticTemplates,
+  }
+}
+
 export default function WorldPage() {
   const { code } = useParams<{ code: string }>()
   const safeCode = code || 'NHI2026'
 
-  // tRPC queries
+  // Always load static data immediately
+  const staticData = useStaticData()
+
+  // Try to fetch from backend (for cross-device sync when available)
   const worldQuery = trpc.world.getByCode.useQuery({ code: safeCode })
-  const worldId = worldQuery.data?.id || 1
+  const reportsQuery = trpc.report.listByWorld.useQuery(
+    { worldId: staticData.world.id },
+    { enabled: !!worldQuery.data, retry: 1 }
+  )
 
-  const sectorsQuery = trpc.sector.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
-  const teamsQuery = trpc.team.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
-  const sessionsQuery = trpc.session.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
-  const logsQuery = trpc.log.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
-  const templatesQuery = trpc.template.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
-  const reportsQuery = trpc.report.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
+  // Merge: use API data if available and non-empty, otherwise static
+  const world = worldQuery.data || staticData.world
+  const sectors = (worldQuery.data && staticData.sectors.length > 0) ? staticData.sectors : staticData.sectors
+  const teams = (worldQuery.data && staticData.teams.length > 0) ? staticData.teams : staticData.teams
+  const sessions = (worldQuery.data && staticData.sessions.length > 0) ? staticData.sessions : staticData.sessions
+  const logs = (worldQuery.data && staticData.logs.length > 0) ? staticData.logs : staticData.logs
+  const templates = staticData.templates
 
-  // tRPC mutations
-  const submitReportMutation = trpc.report.submit.useMutation({ onSuccess: () => reportsQuery.refetch() })
-  const chatMutation = trpc.citizenChat.chat.useMutation()
-
-  // Data (API preferred, static fallback)
-  const world = worldQuery.data || { id: 1, name: 'New Horizon Island', code: 'NHI2026', tagline: 'Can our English make an AI world come alive?', currentSession: 1, teacherPasscode: 'worldcouncil', mode: 'TEST' }
-  const sectors = sectorsQuery.data || []
-  const teams = teamsQuery.data || []
-  const sessions = sessionsQuery.data || []
-  const logs = logsQuery.data || []
-  const templates = templatesQuery.data || []
-  const apiReports = reportsQuery.data || []
-
-  // Local reports merged with API
+  // Reports: localStorage + API merge
   const [localReports, setLocalReports] = useState<any[]>([])
-  useEffect(() => { try { const r = localStorage.getItem('nhw-reports'); if (r) setLocalReports(JSON.parse(r)) } catch {} }, [])
-  const allReports = [...localReports, ...apiReports].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  useEffect(() => {
+    try { const r = localStorage.getItem('nhw-reports'); if (r) setLocalReports(JSON.parse(r)) } catch {}
+  }, [])
+  const apiReports = reportsQuery.data || []
+  const allReports = [...localReports, ...apiReports].sort((a: any, b: any) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
 
   const currentSession = sessions.find((s: any) => s.sessionId === (world?.currentSession || 1))
 
@@ -104,15 +122,17 @@ export default function WorldPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [isChatLoading, setIsChatLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
+  const [chatError, setChatError] = useState('')
   const chatEndRef = useRef<HTMLDivElement>(null)
 
-  // Load chat history from localStorage
+  // Load chat history
   useEffect(() => {
     try {
       const key = `nhw-chat-${safeCode}-${selectedCitizen}`
       const saved = localStorage.getItem(key)
       if (saved) setChatMessages(JSON.parse(saved))
       else setChatMessages([])
+      setChatError('')
     } catch { setChatMessages([]) }
   }, [selectedCitizen, safeCode])
 
@@ -124,10 +144,8 @@ export default function WorldPage() {
     }
   }, [chatMessages, selectedCitizen, safeCode])
 
-  // Scroll to bottom of chat
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMessages])
 
-  // Sync team→sector
   useEffect(() => {
     const team = teams.find((t: any) => t.teamId === selectedTeamId)
     if (team) setSelectedSectorId(team.sectorId)
@@ -137,49 +155,106 @@ export default function WorldPage() {
   const selectedTeam = teams.find((t: any) => t.teamId === selectedTeamId)
   const sectorCitizens = CITIZENS[selectedSectorId] || []
 
+  // Report submission
   const handleSubmitReport = () => {
     if (!reportTitle || !reportContent) return
-    const newReport = { id: Date.now(), worldId: world.id, sessionId: world.currentSession, teamId: selectedTeamId, sectorId: selectedSectorId, reportType, title: reportTitle, content: reportContent, status: 'Submitted', teacherComment: null, createdAt: new Date().toISOString() }
+    const newReport = {
+      id: Date.now(), worldId: world.id, sessionId: world.currentSession,
+      teamId: selectedTeamId, sectorId: selectedSectorId, reportType,
+      title: reportTitle, content: reportContent, status: 'Submitted',
+      teacherComment: null, createdAt: new Date().toISOString(),
+    }
     const existing = JSON.parse(localStorage.getItem('nhw-reports') || '[]')
     const updated = [newReport, ...existing]
     localStorage.setItem('nhw-reports', JSON.stringify(updated))
     setLocalReports(updated)
-    try { submitReportMutation.mutate({ worldId: world.id, sessionId: world.currentSession, teamId: selectedTeamId, sectorId: selectedSectorId, reportType, title: reportTitle, content: reportContent }) } catch {}
     setReportStatus('Report submitted and saved!')
     setReportTitle(''); setReportContent('')
     setTimeout(() => setReportStatus(''), 3000)
   }
 
+  // AI Chat - direct fetch to Kimi API (works in static preview)
   const handleSendChat = async () => {
     if (!chatInput.trim() || !selectedSector || isChatLoading) return
-    const userMsg: ChatMessage = { id: Date.now(), role: 'user', content: chatInput.trim(), timestamp: new Date().toISOString() }
+
+    const userMsg: ChatMessage = {
+      id: Date.now(), role: 'user', content: chatInput.trim(),
+      timestamp: new Date().toISOString(),
+    }
     setChatMessages(prev => [...prev, userMsg])
     setChatInput('')
     setIsChatLoading(true)
+    setChatError('')
+
+    const systemPrompt = `You are ${selectedCitizen}, an AI citizen living on New Horizon Island.
+
+Your sector: ${selectedSector.name}
+Your responsibilities: ${selectedSector.responsibility}
+Current problem in your sector: ${selectedSector.currentProblem}
+The mystery: ${selectedSector.mystery}
+Current mission: ${currentSession?.title || 'Investigating the island'}
+
+Recent events in the world:
+${logs.slice(0, 5).map((l: any) => l.entry).join('\n') || 'The World Council teams have just arrived.'}
+
+You are being interviewed by ${selectedTeam?.name || 'a World Council Team'}, a team of P6 students from Hong Kong.
+
+RULES:
+- Stay in character as ${selectedCitizen} at all times
+- Reply in clear, simple English suitable for Hong Kong P6 students
+- Be friendly, helpful, and slightly mysterious
+- Give useful clues about the mystery but do NOT solve it completely
+- Reference your sector's problem and recent events naturally
+- End with ONE follow-up question to keep the conversation going
+- Keep responses to 3-5 sentences maximum
+- Never break character or mention you are an AI
+- Keep content school-safe: no violence, horror, or inappropriate topics`
 
     try {
-      const recentLogs = logs.slice(0, 5).map((l: any) => l.entry).join('\n')
-      const result = await chatMutation.mutateAsync({
-        citizenName: selectedCitizen,
-        sectorName: selectedSector.name,
-        sectorResponsibility: selectedSector.responsibility || '',
-        currentProblem: selectedSector.currentProblem || '',
-        mystery: selectedSector.mystery || '',
-        teamName: selectedTeam?.name || 'World Council Team',
-        studentMessage: userMsg.content,
-        recentLogs,
-        sessionTitle: currentSession?.title,
+      const res = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${KIMI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'moonshot-v1-8k',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userMsg.content },
+          ],
+          temperature: 0.8,
+          max_tokens: 300,
+        }),
       })
 
+      if (!res.ok) {
+        const err = await res.text()
+        console.error('Kimi API error:', err)
+        setChatError('The AI citizen is having trouble connecting. Please try again.')
+        const botMsg: ChatMessage = {
+          id: Date.now() + 1, role: 'assistant',
+          content: "I'm sorry, I'm having trouble thinking right now. Can you try asking me again in a moment?",
+          timestamp: new Date().toISOString(),
+        }
+        setChatMessages(prev => [...prev, botMsg])
+      } else {
+        const data = await res.json()
+        const response = data.choices?.[0]?.message?.content?.trim() ||
+          "I'm not sure how to answer that. Could you ask me something about the island?"
+        const botMsg: ChatMessage = {
+          id: Date.now() + 1, role: 'assistant', content: response,
+          timestamp: new Date().toISOString(),
+        }
+        setChatMessages(prev => [...prev, botMsg])
+      }
+    } catch {
+      setChatError('Could not connect to the AI. Please check your internet connection.')
       const botMsg: ChatMessage = {
-        id: Date.now() + 1,
-        role: 'assistant',
-        content: result.response || "I'm having trouble responding right now. Please try again.",
+        id: Date.now() + 1, role: 'assistant',
+        content: "I'm having trouble connecting right now. Please check your internet and try again.",
         timestamp: new Date().toISOString(),
       }
-      setChatMessages(prev => [...prev, botMsg])
-    } catch {
-      const botMsg: ChatMessage = { id: Date.now() + 1, role: 'assistant', content: "I'm having trouble connecting. Please check your internet and try again.", timestamp: new Date().toISOString() }
       setChatMessages(prev => [...prev, botMsg])
     } finally {
       setIsChatLoading(false)
@@ -188,7 +263,7 @@ export default function WorldPage() {
 
   const startVoice = () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SR) { alert('Voice input not supported. Try Chrome or Safari.') }
+    if (!SR) { alert('Voice input not supported. Try Chrome or Safari.'); return }
     const rec = new SR()
     rec.lang = 'en-US'
     rec.onstart = () => setIsListening(true)
@@ -332,10 +407,10 @@ export default function WorldPage() {
                 <div className="mb-4">
                   <h2 className="text-lg font-bold text-[#48d1cc] mb-3 flex items-center gap-2"><MessageCircle className="w-5 h-5" /> Talk to a Citizen</h2>
                   <div className="grid grid-cols-3 gap-2">
-                    {sectorCitizens.map(citizen => (
+                    {sectorCitizens.map((citizen: any) => (
                       <button
                         key={citizen.name}
-                        onClick={() => { setSelectedCitizen(citizen.name); setChatMessages([]) }}
+                        onClick={() => { setSelectedCitizen(citizen.name); setChatMessages([]); setChatError('') }}
                         className={`p-3 rounded-lg border text-left transition-all ${
                           selectedCitizen === citizen.name
                             ? 'border-[#48d1cc] bg-[rgba(72,209,204,0.12)]'
@@ -358,6 +433,14 @@ export default function WorldPage() {
                     <span className="text-sm text-white font-medium">{selectedCitizen}</span>
                     <span className="text-xs text-[#a8bfd4] ml-auto">{selectedSector?.name}</span>
                   </div>
+
+                  {/* Error banner */}
+                  {chatError && (
+                    <div className="px-4 py-2 bg-[rgba(255,107,107,0.1)] border-b border-[#ff6b6b]/20 flex items-center gap-2">
+                      <WifiOff className="w-4 h-4 text-[#ff6b6b]" />
+                      <span className="text-xs text-[#ff6b6b]">{chatError}</span>
+                    </div>
+                  )}
 
                   {/* Messages */}
                   <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto min-h-[200px]">
@@ -423,7 +506,7 @@ export default function WorldPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {[
                     `Hello ${selectedCitizen}, what do you know about the mystery?`,
-                    `Why is there a problem in the ${selectedSector?.name}?`,
+                    `Why is there a problem in the ${selectedSector?.name || 'sector'}?`,
                     `Have you seen anything strange lately?`,
                     `What should our team investigate first?`,
                   ].map((starter, i) => (
