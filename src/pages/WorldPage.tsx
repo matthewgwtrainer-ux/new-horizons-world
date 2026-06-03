@@ -50,8 +50,6 @@ const CITIZENS: Record<string, { name: string; role: string }[]> = {
   ],
 }
 
-const KIMI_API_KEY = 'sk-lUGKRBJHjb06BtSDtwt1pCYDr4HjZtue3uagyBfl9Glmzl5Y'
-
 interface ChatMessage {
   id: number
   role: 'user' | 'assistant'
@@ -173,7 +171,9 @@ export default function WorldPage() {
     setTimeout(() => setReportStatus(''), 3000)
   }
 
-  // AI Chat - direct fetch to Kimi API (works in static preview)
+  // AI Chat via backend tRPC (avoids CORS)
+  const chatMutation = trpc.citizenChat.chat.useMutation()
+
   const handleSendChat = async () => {
     if (!chatInput.trim() || !selectedSector || isChatLoading) return
 
@@ -186,70 +186,31 @@ export default function WorldPage() {
     setIsChatLoading(true)
     setChatError('')
 
-    const systemPrompt = `You are ${selectedCitizen}, an AI citizen living on New Horizon Island.
-
-Your sector: ${selectedSector.name}
-Your responsibilities: ${selectedSector.responsibility}
-Current problem in your sector: ${selectedSector.currentProblem}
-The mystery: ${selectedSector.mystery}
-Current mission: ${currentSession?.title || 'Investigating the island'}
-
-Recent events in the world:
-${logs.slice(0, 5).map((l: any) => l.entry).join('\n') || 'The World Council teams have just arrived.'}
-
-You are being interviewed by ${selectedTeam?.name || 'a World Council Team'}, a team of P6 students from Hong Kong.
-
-RULES:
-- Stay in character as ${selectedCitizen} at all times
-- Reply in clear, simple English suitable for Hong Kong P6 students
-- Be friendly, helpful, and slightly mysterious
-- Give useful clues about the mystery but do NOT solve it completely
-- Reference your sector's problem and recent events naturally
-- End with ONE follow-up question to keep the conversation going
-- Keep responses to 3-5 sentences maximum
-- Never break character or mention you are an AI
-- Keep content school-safe: no violence, horror, or inappropriate topics`
-
     try {
-      const res = await fetch('https://api.moonshot.cn/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${KIMI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'moonshot-v1-8k',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userMsg.content },
-          ],
-          temperature: 0.8,
-          max_tokens: 300,
-        }),
+      const result = await chatMutation.mutateAsync({
+        citizenName: selectedCitizen,
+        sectorName: selectedSector.name,
+        sectorResponsibility: selectedSector.responsibility || '',
+        currentProblem: selectedSector.currentProblem || '',
+        mystery: selectedSector.mystery || '',
+        teamName: selectedTeam?.name || 'World Council Team',
+        studentMessage: userMsg.content,
+        recentLogs: logs.slice(0, 5).map((l: any) => l.entry).join('\n') || 'The World Council teams have just arrived.',
+        sessionTitle: currentSession?.title || 'Investigating the island',
       })
 
-      if (!res.ok) {
-        const err = await res.text()
-        console.error('Kimi API error:', err)
+      if (result.error) {
         setChatError('The AI citizen is having trouble connecting. Please try again.')
-        const botMsg: ChatMessage = {
-          id: Date.now() + 1, role: 'assistant',
-          content: "I'm sorry, I'm having trouble thinking right now. Can you try asking me again in a moment?",
-          timestamp: new Date().toISOString(),
-        }
-        setChatMessages(prev => [...prev, botMsg])
-      } else {
-        const data = await res.json()
-        const response = data.choices?.[0]?.message?.content?.trim() ||
-          "I'm not sure how to answer that. Could you ask me something about the island?"
-        const botMsg: ChatMessage = {
-          id: Date.now() + 1, role: 'assistant', content: response,
-          timestamp: new Date().toISOString(),
-        }
-        setChatMessages(prev => [...prev, botMsg])
       }
+
+      const botMsg: ChatMessage = {
+        id: Date.now() + 1, role: 'assistant',
+        content: result.response || "I'm not sure how to answer that. Could you ask me something about the island?",
+        timestamp: new Date().toISOString(),
+      }
+      setChatMessages(prev => [...prev, botMsg])
     } catch {
-      setChatError('Could not connect to the AI. Please check your internet connection.')
+      setChatError('Could not connect to the AI server. Please check your internet connection.')
       const botMsg: ChatMessage = {
         id: Date.now() + 1, role: 'assistant',
         content: "I'm having trouble connecting right now. Please check your internet and try again.",

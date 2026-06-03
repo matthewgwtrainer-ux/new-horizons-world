@@ -18,7 +18,7 @@ export const sessionRouter = createRouter({
       const db = getDb();
       const result = await db.select().from(sessions).where(
         and(eq(sessions.worldId, input.worldId), eq(sessions.sessionId, input.sessionId))
-      );
+      ).limit(1);
       return result[0] || null;
     }),
 });

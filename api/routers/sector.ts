@@ -16,7 +16,7 @@ export const sectorRouter = createRouter({
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const db = getDb();
-      const result = await db.select().from(sectors).where(eq(sectors.id, input.id));
+      const result = await db.select().from(sectors).where(eq(sectors.id, input.id)).limit(1);
       return result[0] || null;
     }),
 

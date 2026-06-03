@@ -1,102 +1,93 @@
-import {
-  mysqlTable,
-  serial,
-  varchar,
-  text,
-  timestamp,
-  bigint,
-  int,
-} from "drizzle-orm/mysql-core";
+import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 
-export const worlds = mysqlTable("worlds", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  code: varchar("code", { length: 50 }).notNull().unique(),
-  tagline: varchar("tagline", { length: 255 }).notNull(),
-  currentSession: int("current_session").notNull().default(1),
-  teacherPasscode: varchar("teacher_passcode", { length: 100 }).notNull(),
-  mode: varchar("mode", { length: 20 }).notNull().default("TEST"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const worlds = sqliteTable("worlds", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  code: text("code").notNull().unique(),
+  tagline: text("tagline").notNull(),
+  currentSession: integer("current_session").notNull().default(1),
+  teacherPasscode: text("teacher_passcode").notNull(),
+  mode: text("mode").notNull().default("TEST"),
 });
 
-export const sectors = mysqlTable("sectors", {
-  id: serial("id").primaryKey(),
-  worldId: bigint("world_id", { mode: "number", unsigned: true }).notNull(),
-  sectorId: varchar("sector_id", { length: 50 }).notNull(),
-  name: varchar("name", { length: 100 }).notNull(),
-  displayOrder: int("display_order").notNull().default(0),
+export const sectors = sqliteTable("sectors", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  worldId: integer("world_id").notNull(),
+  sectorId: text("sector_id").notNull(),
+  name: text("name").notNull(),
+  displayOrder: integer("display_order").notNull().default(0),
   responsibility: text("responsibility"),
   locations: text("locations"),
   citizens: text("citizens"),
   currentProblem: text("current_problem"),
   mystery: text("mystery"),
-  status: varchar("status", { length: 20 }).notNull().default("Active"),
+  status: text("status").notNull().default("Active"),
 });
 
-export const teams = mysqlTable("teams", {
-  id: serial("id").primaryKey(),
-  worldId: bigint("world_id", { mode: "number", unsigned: true }).notNull(),
-  teamId: varchar("team_id", { length: 50 }).notNull(),
-  name: varchar("name", { length: 100 }).notNull(),
-  sectorId: varchar("sector_id", { length: 50 }).notNull(),
+export const teams = sqliteTable("teams", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  worldId: integer("world_id").notNull(),
+  teamId: text("team_id").notNull(),
+  name: text("name").notNull(),
+  sectorId: text("sector_id").notNull(),
   members: text("members"),
   currentTask: text("current_task"),
-  status: varchar("status", { length: 20 }).notNull().default("Active"),
+  status: text("status").notNull().default("Active"),
 });
 
-export const sessions = mysqlTable("sessions", {
-  id: serial("id").primaryKey(),
-  worldId: bigint("world_id", { mode: "number", unsigned: true }).notNull(),
-  sessionId: int("session_id").notNull(),
-  title: varchar("title", { length: 255 }).notNull(),
+export const sessions = sqliteTable("sessions", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  worldId: integer("world_id").notNull(),
+  sessionId: integer("session_id").notNull(),
+  title: text("title").notNull(),
   worldUpdate: text("world_update"),
   mainProblem: text("main_problem"),
   wholeClassGoal: text("whole_class_goal"),
   teamTask: text("team_task"),
-  status: varchar("status", { length: 20 }).notNull().default("Active"),
+  status: text("status").notNull().default("Active"),
 });
 
-export const logs = mysqlTable("logs", {
-  id: serial("id").primaryKey(),
-  worldId: bigint("world_id", { mode: "number", unsigned: true }).notNull(),
-  sessionId: int("session_id").notNull(),
-  sectorId: varchar("sector_id", { length: 50 }).notNull(),
-  type: varchar("type", { length: 50 }).notNull(),
+export const logs = sqliteTable("logs", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  worldId: integer("world_id").notNull(),
+  sessionId: integer("session_id").notNull(),
+  sectorId: text("sector_id").notNull(),
+  type: text("type").notNull(),
   entry: text("entry").notNull(),
-  addedBy: varchar("added_by", { length: 100 }).notNull(),
-  visibility: varchar("visibility", { length: 20 }).notNull().default("Public"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  addedBy: text("added_by").notNull(),
+  visibility: text("visibility").notNull().default("Public"),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 
-export const reports = mysqlTable("reports", {
-  id: serial("id").primaryKey(),
-  worldId: bigint("world_id", { mode: "number", unsigned: true }).notNull(),
-  sessionId: int("session_id").notNull(),
-  teamId: varchar("team_id", { length: 50 }).notNull(),
-  sectorId: varchar("sector_id", { length: 50 }).notNull(),
-  reportType: varchar("report_type", { length: 50 }).notNull(),
-  title: varchar("title", { length: 255 }).notNull(),
+export const reports = sqliteTable("reports", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  worldId: integer("world_id").notNull(),
+  sessionId: integer("session_id").notNull(),
+  teamId: text("team_id").notNull(),
+  sectorId: text("sector_id").notNull(),
+  reportType: text("report_type").notNull(),
+  title: text("title").notNull(),
   content: text("content").notNull(),
-  status: varchar("status", { length: 20 }).notNull().default("Submitted"),
+  status: text("status").notNull().default("Submitted"),
   teacherComment: text("teacher_comment"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 
-export const events = mysqlTable("events", {
-  id: serial("id").primaryKey(),
-  worldId: bigint("world_id", { mode: "number", unsigned: true }).notNull(),
-  sessionId: int("session_id").notNull(),
-  sectorId: varchar("sector_id", { length: 50 }).notNull(),
-  eventTitle: varchar("event_title", { length: 255 }).notNull(),
+export const events = sqliteTable("events", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  worldId: integer("world_id").notNull(),
+  sessionId: integer("session_id").notNull(),
+  sectorId: text("sector_id").notNull(),
+  eventTitle: text("event_title").notNull(),
   eventDetails: text("event_details"),
-  active: varchar("active", { length: 10 }).notNull().default("true"),
+  active: text("active").notNull().default("true"),
 });
 
-export const templates = mysqlTable("templates", {
-  id: serial("id").primaryKey(),
-  worldId: bigint("world_id", { mode: "number", unsigned: true }).notNull(),
-  templateId: varchar("template_id", { length: 50 }).notNull(),
-  category: varchar("category", { length: 50 }).notNull(),
+export const templates = sqliteTable("templates", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  worldId: integer("world_id").notNull(),
+  templateId: text("template_id").notNull(),
+  category: text("category").notNull(),
   sentenceStarter: text("sentence_starter").notNull(),
   example: text("example"),
 });

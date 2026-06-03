@@ -9,7 +9,7 @@ export const worldRouter = createRouter({
     .input(z.object({ code: z.string() }))
     .query(async ({ input }) => {
       const db = getDb();
-      const result = await db.select().from(worlds).where(eq(worlds.code, input.code));
+      const result = await db.select().from(worlds).where(eq(worlds.code, input.code)).limit(1);
       return result[0] || null;
     }),
 
@@ -40,7 +40,7 @@ export const worldRouter = createRouter({
     }))
     .mutation(async ({ input }) => {
       const db = getDb();
-      const result = await db.select().from(worlds).where(eq(worlds.code, input.code));
+      const result = await db.select().from(worlds).where(eq(worlds.code, input.code)).limit(1);
       const world = result[0];
       return { ok: world?.teacherPasscode === input.passcode };
     }),

@@ -1,16 +1,17 @@
 import "dotenv/config";
 
-function required(name: string): string {
+function envVar(name: string, requiredInProd = false): string {
   const value = process.env[name];
-  if (!value && process.env.NODE_ENV === "production") {
+  if (!value && requiredInProd && process.env.NODE_ENV === "production") {
     throw new Error(`Missing required environment variable: ${name}`);
   }
   return value ?? "";
 }
 
 export const env = {
-  appId: required("APP_ID"),
-  appSecret: required("APP_SECRET"),
+  appId: envVar("APP_ID"),
+  appSecret: envVar("APP_SECRET"),
   isProduction: process.env.NODE_ENV === "production",
-  databaseUrl: required("DATABASE_URL"),
+  databaseUrl: envVar("DATABASE_URL"),
+  databasePath: envVar("DATABASE_PATH") || "./data/app.db",
 };
