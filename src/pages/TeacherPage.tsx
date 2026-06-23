@@ -135,6 +135,7 @@ export default function TeacherPage() {
             <Unlock className="w-5 h-5 text-[#48d1cc]" />
             <h1 className="text-xl font-bold text-white">Teacher Panel</h1>
             <span className="text-xs text-[#ffd166] bg-[#ffd166]/10 px-2 py-1 rounded-full">{world.name}</span>
+            <span className="text-[10px] text-[#48d1cc]/60 font-mono">v2.1</span>
           </div>
           <div className="flex items-center gap-2">
             {/* Navigation links */}
