@@ -69,6 +69,7 @@ const SPEECH_SECTIONS = [
   "The Four Sectors. Harbour Sector: responsible for transport, supplies, visitors, and trade. Citizens include the Harbour Manager, Ferry Pilot, and Supply Robot. Problem: supply boxes arrived with no sender. Mystery: who sent the boxes and why? Garden Sector: responsible for food, water, plants, animals, and health. Citizens include the Botanist, Water Keeper, and Animal Helper. Problem: plants are growing too fast. Mystery: what is causing the strange growth? Tech Sector: responsible for power, robots, communication, and repairs. Citizens include the Engineer, Repair Robot, and Signal Officer. Problem: the Signal Tower sends messages by itself. Mystery: who or what is using the tower? Culture Sector: responsible for history, citizens, news, and rules. Citizens include the Archivist, Young Reporter, and Council Guide. Problem: nobody knows who built the island. Mystery: who built New Horizon Island?",
   "Something is wrong. The island should be ready for visitors. But it is not. Strange things are happening in every sector. Supply boxes arrive with no sender. Plants grow impossibly fast. The Signal Tower sends messages in the middle of the night. And nobody, not even the AI citizens, knows who built the island or why it was left unfinished.",
   "The World Council needs investigators who can use English to ask clear questions to AI citizens, collect evidence and write reports, discuss problems and propose solutions, work together across sector teams, and communicate findings to the Council.",
+  "Warning: not everything is what it seems. The World Council has found Investigation Cards scattered across the island — clues, characters, and mission briefings left behind by someone. Some cards contain real evidence. But the Council has discovered that other cards are fake — planted deliberately to confuse investigators. Who would plant fake clues? And why? This means you cannot believe everything you read. You must compare what the cards say with what the AI citizens tell you. If a citizen does not recognise a clue, it might be a red herring — a trick designed to lead you astray. Use your detective skills. Trust the citizens. Question everything.",
   "The World Council has chosen your team to investigate one sector of New Horizon Island. You will become the experts in your sector. You will interview AI citizens, examine evidence, solve problems, and report back to the Council. Each week, the Council will give your team a new mission. You will use the AI Command Centre to build English prompts, question AI citizens, and discover what is really happening on the island. Your English is not just a school subject here. It is the tool you use to explore, understand, and improve the world.",
   "Your Journey. Session 1: Arrival at New Horizon Island. Meet your team, explore your sector, and investigate your first mystery. Session 2: Meet the Citizens. Interview AI citizens using English questions. Session 3: First Sector Problems. Investigate the problems in your sector and write your first report. Session 4: World Council Meeting. Present your findings to the other teams. Session 5: Island Development. Propose improvements for your sector. Session 6: Newsroom Day. Become journalists and write news articles. Session 7: Broadcast Preparation. Write and rehearse a news broadcast script. Session 8: Final Broadcast and Reflection. Perform your live news broadcast in English.",
   "How the App Works. The Dashboard shows your sector, the mission, the world event log, and English help with sentence starters. The AI Command tab lets you build a prompt in English, speak or type your question, copy it, and paste it into ChatGPT or Kimi to talk to AI citizens. The Newsroom lets you write and submit reports, and read reports from other teams.",
@@ -280,7 +281,7 @@ export default function IntroductionPage() {
         </section>
 
         {/* ===== THE PROBLEMS ===== */}
-        <section className={`animate-slide-up transition-all duration-500 ${isActiveSection(3) || isActiveSection(4) ? 'bg-[rgba(72,209,204,0.08)] -mx-4 px-4 py-4 rounded-xl border border-[#48d1cc]/20' : ''}`}>
+        <section className={`animate-slide-up transition-all duration-500 ${isActiveSection(3) ? 'bg-[rgba(72,209,204,0.08)] -mx-4 px-4 py-4 rounded-xl border border-[#48d1cc]/20' : ''}`}>
           <div className="glass-panel p-6 md:p-8 border-l-4 border-[#ffd166]">
             <h2 className="text-2xl font-bold text-[#ffd166] mb-4 flex items-center gap-3">
               <AlertTriangle className="w-6 h-6" /> Something is Wrong
@@ -300,6 +301,34 @@ export default function IntroductionPage() {
                   </li>
                 ))}
               </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== RED HERRINGS / FAKE CLUES ===== */}
+        <section className={`animate-slide-up transition-all duration-500 ${isActiveSection(4) ? 'bg-[rgba(255,107,107,0.06)] -mx-4 px-4 py-4 rounded-xl border border-[#ff6b6b]/20' : ''}`}>
+          <div className="glass-panel p-6 md:p-8 border-l-4 border-[#ff6b6b]">
+            <h2 className="text-2xl font-bold text-[#ff6b6b] mb-4 flex items-center gap-3">
+              <HelpCircle className="w-6 h-6" /> Not Everything Is What It Seems
+            </h2>
+            <div className="space-y-4 text-[#a8bfd4] leading-relaxed">
+              <p className="text-white text-lg">The World Council has found something troubling.</p>
+              <p>Scattered across the island are <span className="text-[#ffd166] font-medium">Investigation Cards</span> — clues,
+                characters, and mission briefings left behind by... <em>someone</em>. Some of these cards contain
+                <span className="text-[#4ade80] font-medium"> real evidence</span>. But the Council has discovered that
+                <span className="text-[#ff6b6b] font-medium"> other cards are fake</span> — planted deliberately to confuse investigators.</p>
+              <p className="text-white italic">Who would plant fake clues? And why?</p>
+              <p>This means <span className="text-white font-medium">you cannot believe everything you read</span>. You must use your detective skills to
+                <strong> compare what the cards say with what the AI citizens tell you</strong>. If a citizen does not recognise a clue,
+                it might be a <span className="text-[#ff6b6b] font-medium">red herring</span> — a trick designed to lead you astray.</p>
+              <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                <Button
+                  onClick={() => { stop(); navigate('/cards') }}
+                  className="bg-[rgba(255,107,107,0.15)] hover:bg-[rgba(255,107,107,0.25)] border border-[#ff6b6b]/40 text-[#ff6b6b] font-bold px-6"
+                >
+                  <Search className="w-4 h-4 mr-2" /> View Investigation Cards
+                </Button>
+              </div>
             </div>
           </div>
         </section>
