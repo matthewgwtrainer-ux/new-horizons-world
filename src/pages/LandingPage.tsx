@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Compass, Sparkles, ArrowRight, BookOpen, Shield } from 'lucide-react'
+import { Compass, Sparkles, ArrowRight, BookOpen, Shield, Layers } from 'lucide-react'
 
 export default function LandingPage() {
   const navigate = useNavigate()
@@ -95,6 +95,15 @@ export default function LandingPage() {
               </Button>
             </div>
           )}
+
+          <Button
+            size="lg"
+            onClick={() => navigate('/cards')}
+            className="bg-[#a78bfa] hover:bg-[#9578e6] text-[#0a1628] font-bold px-6 py-6 text-base rounded-xl transition-all hover:scale-105"
+          >
+            <Layers className="w-5 h-5 mr-2" />
+            Cards
+          </Button>
 
           <Button
             size="lg"

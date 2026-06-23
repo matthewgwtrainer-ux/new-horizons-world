@@ -82,22 +82,33 @@ export default function WorldPage() {
     { worldId: staticData.world.id },
     { enabled: !!worldQuery.data, retry: 1 }
   )
+  const logsQuery = trpc.log.listByWorld.useQuery(
+    { worldId: staticData.world.id },
+    { enabled: !!worldQuery.data, retry: 1 }
+  )
 
   // Merge: use API data if available and non-empty, otherwise static
   const world = worldQuery.data || staticData.world
   const sectors = (worldQuery.data && staticData.sectors.length > 0) ? staticData.sectors : staticData.sectors
   const teams = (worldQuery.data && staticData.teams.length > 0) ? staticData.teams : staticData.teams
   const sessions = (worldQuery.data && staticData.sessions.length > 0) ? staticData.sessions : staticData.sessions
-  const logs = (worldQuery.data && staticData.logs.length > 0) ? staticData.logs : staticData.logs
+  const logs = logsQuery.isSuccess ? logsQuery.data : staticData.logs
   const templates = staticData.templates
 
-  // Reports: localStorage + API merge
+  // Reports: localStorage + API merge (deduplicated by ID)
   const [localReports, setLocalReports] = useState<any[]>([])
   useEffect(() => {
     try { const r = localStorage.getItem('nhw-reports'); if (r) setLocalReports(JSON.parse(r)) } catch {}
   }, [])
   const apiReports = reportsQuery.data || []
-  const allReports = [...localReports, ...apiReports].sort((a: any, b: any) =>
+  // Merge and deduplicate: prefer API version if same ID exists in both
+  const reportMap = new Map<string, any>()
+  for (const r of apiReports) { reportMap.set(String(r.id), r) }
+  for (const r of localReports) {
+    const key = String(r.id)
+    if (!reportMap.has(key)) { reportMap.set(key, r) }
+  }
+  const allReports = Array.from(reportMap.values()).sort((a: any, b: any) =>
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
 
@@ -153,19 +164,64 @@ export default function WorldPage() {
   const selectedTeam = teams.find((t: any) => t.teamId === selectedTeamId)
   const sectorCitizens = CITIZENS[selectedSectorId] || []
 
-  // Report submission
+  // Track temp report ID to remove from localStorage after backend save
+  const lastTempIdRef = useRef<number | null>(null)
+
+  // Report submission (localStorage + backend)
+  const submitReportMutation = trpc.report.submit.useMutation({
+    onSuccess: (data) => {
+      // Backend save succeeded — remove the temp localStorage copy to prevent duplication
+      try {
+        const saved = JSON.parse(localStorage.getItem('nhw-reports') || '[]')
+        const backendId = String(data?.id)
+        const filtered = saved.filter((r: any) => {
+          const rid = String(r.id)
+          // Remove if it matches the temp ID we just submitted, or if backend returned a real ID
+          // that somehow collides (shouldn't happen, but being safe)
+          if (lastTempIdRef.current && rid === String(lastTempIdRef.current)) return false
+          if (backendId && rid === backendId) return false
+          return true
+        })
+        localStorage.setItem('nhw-reports', JSON.stringify(filtered))
+        setLocalReports(filtered)
+        lastTempIdRef.current = null
+      } catch {
+        // Silent fail — localStorage cleanup is non-critical
+      }
+    },
+  })
+
   const handleSubmitReport = () => {
     if (!reportTitle || !reportContent) return
+    const tempId = Date.now()
+    lastTempIdRef.current = tempId
     const newReport = {
-      id: Date.now(), worldId: world.id, sessionId: world.currentSession,
+      id: tempId, worldId: world.id, sessionId: world.currentSession,
       teamId: selectedTeamId, sectorId: selectedSectorId, reportType,
       title: reportTitle, content: reportContent, status: 'Submitted',
       teacherComment: null, createdAt: new Date().toISOString(),
     }
+    // Always save to localStorage (works even if backend is down)
     const existing = JSON.parse(localStorage.getItem('nhw-reports') || '[]')
     const updated = [newReport, ...existing]
     localStorage.setItem('nhw-reports', JSON.stringify(updated))
     setLocalReports(updated)
+
+    // Also try to save to backend database
+    try {
+      submitReportMutation.mutate({
+        worldId: world.id,
+        sessionId: world.currentSession,
+        teamId: selectedTeamId,
+        sectorId: selectedSectorId,
+        reportType,
+        title: reportTitle,
+        content: reportContent,
+      })
+    } catch {
+      // Backend save failed, but localStorage has it — silent fail
+    }
+
     setReportStatus('Report submitted and saved!')
     setReportTitle(''); setReportContent('')
     setTimeout(() => setReportStatus(''), 3000)
@@ -197,6 +253,8 @@ export default function WorldPage() {
         studentMessage: userMsg.content,
         recentLogs: logs.slice(0, 5).map((l: any) => l.entry).join('\n') || 'The World Council teams have just arrived.',
         sessionTitle: currentSession?.title || 'Investigating the island',
+        sessionNumber: world?.currentSession || 1,
+        sectorId: selectedSectorId,
       })
 
       if (result.error) {

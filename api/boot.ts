@@ -22,6 +22,16 @@ app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
 export default app;
 
 if (env.isProduction) {
+  // Initialize database: create tables programmatically, then seed
+  try {
+    const { initDatabase } = await import("./queries/initDb");
+    await initDatabase();
+    console.log("Database initialized successfully");
+  } catch (err: any) {
+    console.error("Database initialization failed:", err.message);
+    // Continue anyway — static data will serve as fallback
+  }
+
   const { serve } = await import("@hono/node-server");
   const { serveStaticFiles } = await import("./lib/vite");
   serveStaticFiles(app);

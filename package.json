@@ -14,8 +14,7 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "postinstall": "npm run db:push || true"
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.3",
