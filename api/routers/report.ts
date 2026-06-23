@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createRouter, publicQuery } from "../middleware";
 import { getDb } from "../queries/connection";
 import { reports } from "@db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export const reportRouter = createRouter({
   listByWorld: publicQuery
@@ -40,5 +40,13 @@ export const reportRouter = createRouter({
       const db = getDb();
       await db.update(reports).set({ teacherComment: input.comment }).where(eq(reports.id, input.id));
       return { success: true };
+    }),
+
+  clearByWorld: publicQuery
+    .input(z.object({ worldId: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = getDb();
+      await db.delete(reports).where(eq(reports.worldId, input.worldId));
+      return { success: true, deleted: true };
     }),
 });

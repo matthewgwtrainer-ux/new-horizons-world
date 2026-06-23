@@ -44,6 +44,12 @@ export default function TeacherPage() {
   const updateSessionMutation = trpc.world.updateSession.useMutation({
     onSuccess: () => { worldQuery.refetch() }
   })
+  const clearLogsMutation = trpc.log.clearByWorld.useMutation({
+    onSuccess: () => { logsQuery.refetch() }
+  })
+  const clearReportsMutation = trpc.report.clearByWorld.useMutation({
+    onSuccess: () => { reportsQuery.refetch() }
+  })
 
   // Use API data when available, fall back to static
   const world = worldQuery.data || staticWorld
@@ -315,9 +321,15 @@ export default function TeacherPage() {
               <h2 className="text-lg font-bold text-[#ff6b6b] mb-3 flex items-center gap-2">
                 <RotateCcw className="w-5 h-5" /> Reset World
               </h2>
-              <p className="text-sm text-[#a8bfd4] mb-4">This will delete ALL student reports and log entries and restore the world to its original state.</p>
-              <Button onClick={() => {
-                if (confirm('Are you sure? This will delete ALL student work!')) {
+              <p className="text-sm text-[#a8bfd4] mb-4">This will delete ALL student reports and log entries from the server database and clear all local browser data.</p>
+              <Button onClick={async () => {
+                if (confirm('Are you sure? This will permanently delete ALL student work from the server!')) {
+                  try {
+                    await clearLogsMutation.mutateAsync({ worldId })
+                    await clearReportsMutation.mutateAsync({ worldId })
+                  } catch {
+                    // Even if backend fails, still clear localStorage
+                  }
                   localStorage.clear()
                   window.location.reload()
                 }
