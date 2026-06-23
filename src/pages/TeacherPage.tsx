@@ -26,6 +26,7 @@ export default function TeacherPage() {
   const [importText, setImportText] = useState('')
   const [showImport, setShowImport] = useState(false)
   const [importStatus, setImportStatus] = useState('')
+  const [resetStatus, setResetStatus] = useState('')
 
   // tRPC queries
   const worldQuery = trpc.world.getByCode.useQuery({ code: 'NHI2026' })
@@ -322,20 +323,39 @@ export default function TeacherPage() {
                 <RotateCcw className="w-5 h-5" /> Reset World
               </h2>
               <p className="text-sm text-[#a8bfd4] mb-4">This will delete ALL student reports and log entries from the server database and clear all local browser data.</p>
-              <Button onClick={async () => {
-                if (confirm('Are you sure? This will permanently delete ALL student work from the server!')) {
+              <Button
+                disabled={clearLogsMutation.isPending || clearReportsMutation.isPending}
+                onClick={async () => {
+                  if (!confirm('Are you sure? This will permanently delete ALL student work from the server!')) return
+                  setResetStatus('Clearing logs...')
                   try {
-                    await clearLogsMutation.mutateAsync({ worldId })
-                    await clearReportsMutation.mutateAsync({ worldId })
-                  } catch {
-                    // Even if backend fails, still clear localStorage
+                    console.log('[Reset] Clearing logs for worldId:', worldId)
+                    const logResult = await clearLogsMutation.mutateAsync({ worldId })
+                    console.log('[Reset] Logs cleared:', logResult)
+                    setResetStatus('Logs cleared. Clearing reports...')
+
+                    const reportResult = await clearReportsMutation.mutateAsync({ worldId })
+                    console.log('[Reset] Reports cleared:', reportResult)
+                    setResetStatus('All data cleared! Reloading...')
+
+                    localStorage.clear()
+                    setTimeout(() => window.location.reload(), 800)
+                  } catch (err: any) {
+                    const msg = err?.message || String(err)
+                    console.error('[Reset] Error:', err)
+                    setResetStatus('Error: ' + msg)
                   }
-                  localStorage.clear()
-                  window.location.reload()
-                }
-              }} className="bg-[#ff6b6b] hover:bg-[#e55a5a] text-white font-bold">
-                <RotateCcw className="w-4 h-4 mr-2" /> Reset Everything
+                }}
+                className="bg-[#ff6b6b] hover:bg-[#e55a5a] text-white font-bold"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                {clearLogsMutation.isPending || clearReportsMutation.isPending ? 'Clearing...' : 'Reset Everything'}
               </Button>
+              {resetStatus && (
+                <p className={`text-sm mt-3 ${resetStatus.includes('Error') ? 'text-[#ff6b6b]' : 'text-[#4ade80]'}`}>
+                  {resetStatus}
+                </p>
+              )}
             </div>
           </div>
         )}
