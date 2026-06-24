@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import {
   ArrowLeft, ArrowRight, Ship, Leaf, Cpu, BookOpen, AlertTriangle,
   Users, MapPin, Lightbulb, Scroll, Mic, FileText, Radio, Award,
-  Play, Pause, Square, Volume2, Headphones
+  Play, Pause, Square, Volume2, Headphones, HelpCircle, Search
 } from 'lucide-react'
 import { useTextToSpeech } from '@/hooks/useTextToSpeech'
 import { useMemo } from 'react'
