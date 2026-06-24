@@ -211,8 +211,17 @@ export default function IntroductionPage() {
 
         {/* ===== HERO SECTION ===== */}
         <section className={`text-center animate-fade-in transition-all duration-500 ${isActiveSection(0) ? 'bg-[rgba(72,209,204,0.08)] -mx-4 px-4 py-4 rounded-xl border border-[#48d1cc]/20' : ''}`}>
-          <div className="rounded-2xl overflow-hidden border border-[#48d1cc]/30 shadow-2xl shadow-[#48d1cc]/10 mb-8">
+          <div className="rounded-2xl overflow-hidden border border-[#48d1cc]/30 shadow-2xl shadow-[#48d1cc]/10 mb-6">
             <img src="/island-hero.jpg" alt="New Horizon Island" className="w-full h-56 md:h-80 object-cover" />
+          </div>
+          <div className="rounded-2xl overflow-hidden border border-[#48d1cc]/30 mb-8 aspect-video">
+            <iframe
+              src="https://www.youtube.com/embed/lBtH4pVAX2Q"
+              title="New Horizon Island Introduction"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
           </div>
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 text-glow">
             Welcome to <span className="text-[#48d1cc]">New Horizon Island</span>
