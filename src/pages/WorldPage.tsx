@@ -324,14 +324,9 @@ export default function WorldPage() {
             <span className="text-xs text-[#48d1cc] bg-[#48d1cc]/10 px-2 py-1 rounded-full border border-[#48d1cc]/30">Session {world.currentSession}</span>
           </div>
           <p className="hidden md:block text-sm text-[#a8bfd4] italic">{world.tagline}</p>
-          <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
-            <SelectTrigger className="w-44 bg-[rgba(16,40,72,0.9)] border-[#48d1cc]/30 text-white text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-[#102848]">
-              {teams.map((t: any) => <SelectItem key={t.teamId} value={t.teamId} className="text-white">{t.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <div className="text-xs text-[#48d1cc] bg-[#48d1cc]/10 px-3 py-1.5 rounded-full border border-[#48d1cc]/30">
+            {selectedTeam?.name || 'Select a Sector'}
+          </div>
         </div>
       </header>
 

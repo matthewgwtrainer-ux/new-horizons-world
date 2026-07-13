@@ -136,10 +136,10 @@ export const staticTeams: StaticTeam[] = [
 export const staticSessions: StaticSession[] = [
   {
     id: 1, sessionId: 1, title: "First Contact with New Horizon Island",
-    worldUpdate: "The World Council has invited your teams to inspect a new AI island near Hong Kong. Four sectors are working, but strange problems have already appeared.",
+    worldUpdate: "The World Council has invited your teams to investigate a new AI island near Hong Kong remotely. Four sectors are working, but strange problems have already appeared.",
     mainProblem: "Each sector has a mystery. The island cannot open to visitors until the teams investigate and report clearly.",
     wholeClassGoal: "Use English to question AI citizens, collect evidence, and make a first World Council report.",
-    teamTask: "Click your sector, read the problem, build a prompt, question an AI citizen, then write a short report.",
+    teamTask: "Click your sector, read the problem, choose a citizen in Meet the Citizens, ask them questions in English, then write a short report.",
     status: "Active",
   },
   {
@@ -147,7 +147,7 @@ export const staticSessions: StaticSession[] = [
     worldUpdate: "The AI citizens are becoming more talkative. Some have started leaving messages for the World Council teams.",
     mainProblem: "Citizens know more than they are saying. Teams must ask the right questions.",
     wholeClassGoal: "Interview AI citizens and collect character profiles.",
-    teamTask: "Choose a citizen. Build a prompt. Interview them and record what you learn.",
+    teamTask: "Choose a citizen in Meet the Citizens. Message them in English, ask questions, and record what you learn.",
     status: "Active",
   },
   {
