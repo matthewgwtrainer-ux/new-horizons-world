@@ -344,6 +344,15 @@ export default function WorldPage() {
 
           {/* DASHBOARD TAB */}
           <TabsContent value="dashboard" className="animate-fade-in">
+            {/* Dashboard Hero Banner */}
+            <div className="relative rounded-2xl overflow-hidden mb-4 border border-[#48d1cc]/20">
+              <img src="/dashboard-hero.jpg" alt="World Council Investigator Dashboard" className="w-full h-48 md:h-64 object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] via-[#0a1628]/40 to-transparent" />
+              <div className="absolute bottom-3 left-4 right-4">
+                <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg">Investigator Dashboard</h2>
+                <p className="text-sm text-[#a8bfd4] drop-shadow">Your mission control centre for exploring New Horizon Island</p>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Sectors */}
               <div className="glass-panel p-4 md:col-span-1">
