@@ -1,12 +1,27 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, MapPin, HelpCircle, AlertTriangle, Radio, Leaf, BookOpen, Ship, Cpu, Droplets, PawPrint, Scroll, Users, Anchor, Zap, Plus, Minus, RotateCcw } from 'lucide-react';
+import { ArrowLeft, MapPin, HelpCircle, AlertTriangle, Radio, Leaf, BookOpen, Ship, Cpu, Droplets, PawPrint, Scroll, Users, Anchor, Zap, Plus, Minus, RotateCcw, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+const MAP_LABELS = [
+  // Sectors (large labels)
+  { id: 'garden', text: 'Garden Sector', sub: 'Dr. Aria Green \u00b7 Kai Ocean \u00b7 Nia Patel', x: 72, y: 28, colour: '#4ade80', icon: Leaf, size: 'large' },
+  { id: 'tech', text: 'Tech Sector', sub: 'Malik Okafor \u00b7 Zara Kim \u00b7 Ren Sakai', x: 72, y: 72, colour: '#c084fc', icon: Cpu, size: 'large' },
+  { id: 'harbour', text: 'Harbour Sector', sub: 'Carlos Marin \u00b7 Mei Lin \u00b7 SR4', x: 20, y: 72, colour: '#60a5fa', icon: Anchor, size: 'large' },
+  { id: 'culture', text: 'Culture Sector', sub: 'Mira Lee \u00b7 Sofia Cruz \u00b7 Leo Walker', x: 20, y: 28, colour: '#fbbf24', icon: BookOpen, size: 'large' },
+  // Central plaza
+  { id: 'plaza', text: 'Central Plaza', sub: 'All roads meet here', x: 50, y: 50, colour: '#ffffff', icon: MapPin, size: 'medium' },
+  // Key landmarks
+  { id: 'signal', text: 'Signal Tower', sub: 'Midnight transmissions', x: 78, y: 55, colour: '#c084fc', icon: Radio, size: 'small' },
+  { id: 'tree', text: 'Great Tree', sub: 'Bioluminescent canopy', x: 65, y: 18, colour: '#4ade80', icon: Leaf, size: 'small' },
+  { id: 'dock', text: 'Harbour Dock', sub: 'Mystery boxes appeared here', x: 12, y: 62, colour: '#60a5fa', icon: Ship, size: 'small' },
+  { id: 'temple', text: 'Archive Hall', sub: 'Missing construction records', x: 15, y: 38, colour: '#fbbf24', icon: Scroll, size: 'small' },
+];
 
 const LOCATIONS = [
   {
     sector: 'Harbour Sector',
-    colour: '#48d1cc',
+    colour: '#60a5fa',
     icon: Anchor,
     locations: [
       { name: 'Harbour Dock', icon: Ship, desc: 'Where the mystery boxes appeared. Ferry terminal and cargo operations.' },
@@ -16,7 +31,7 @@ const LOCATIONS = [
   },
   {
     sector: 'Tech Sector',
-    colour: '#48d1cc',
+    colour: '#c084fc',
     icon: Cpu,
     locations: [
       { name: 'Signal Tower', icon: Radio, desc: 'Sends automatic midnight messages with coded coordinates. Has a hidden secondary transmitter.' },
@@ -36,7 +51,7 @@ const LOCATIONS = [
   },
   {
     sector: 'Culture Sector',
-    colour: '#ffd166',
+    colour: '#fbbf24',
     icon: BookOpen,
     locations: [
       { name: 'Archive Hall', icon: Scroll, desc: 'Contains island records — including the missing construction files. Mira Lee\'s domain.' },
@@ -66,6 +81,8 @@ export default function MapPage() {
   const navigate = useNavigate();
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [activeLabel, setActiveLabel] = useState<string | null>(null);
+  const [showLabels, setShowLabels] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
@@ -87,7 +104,6 @@ export default function MapPage() {
     setPan({ x: 0, y: 0 });
   }, []);
 
-  // Touch/drag panning
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (zoom <= 1) return;
     isDragging.current = true;
@@ -107,7 +123,6 @@ export default function MapPage() {
     isDragging.current = false;
   }, []);
 
-  // Double-tap to zoom
   const lastTap = useRef(0);
   const handleDoubleTap = useCallback((e: React.MouseEvent) => {
     const now = Date.now();
@@ -140,7 +155,15 @@ export default function MapPage() {
             <ArrowLeft className="w-5 h-5 mr-2" /> Back
           </Button>
           <h1 className="text-white font-bold text-lg">Island Map</h1>
-          <div className="w-20" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowLabels(!showLabels)}
+            className="text-[#a8bfd4] hover:text-white"
+          >
+            <Eye className="w-4 h-4 mr-1" />
+            {showLabels ? 'Hide' : 'Show'}
+          </Button>
         </div>
       </header>
 
@@ -158,7 +181,7 @@ export default function MapPage() {
         >
           {/* Map Image with Transform */}
           <div
-            className="w-full transition-transform duration-200 ease-out will-change-transform"
+            className="relative w-full transition-transform duration-200 ease-out will-change-transform"
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: 'center center',
@@ -166,20 +189,71 @@ export default function MapPage() {
             }}
           >
             <img
-              src="/island-terrain.jpg"
-              alt="New Horizon Island 3D Terrain Map"
+              src="/island-hero.jpg"
+              alt="New Horizon Island Map"
               className="w-full h-auto pointer-events-none"
               draggable={false}
             />
+
+            {/* Overlay Labels */}
+            {showLabels && MAP_LABELS.map((label) => {
+              const Icon = label.icon;
+              const isActive = activeLabel === label.id;
+              return (
+                <div
+                  key={label.id}
+                  className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+                  style={{ left: `${label.x}%`, top: `${label.y}%`, zIndex: isActive ? 30 : 20 }}
+                  onClick={(e) => { e.stopPropagation(); setActiveLabel(isActive ? null : label.id); }}
+                >
+                  {/* Pin dot */}
+                  <div
+                    className="absolute left-1/2 top-full w-0.5 bg-white/60"
+                    style={{ height: label.size === 'large' ? '24px' : '16px', transform: 'translateX(-50%)' }}
+                  />
+                  <div
+                    className="absolute left-1/2 top-full rounded-full"
+                    style={{
+                      width: 8, height: 8,
+                      backgroundColor: label.colour,
+                      transform: 'translate(-50%, -4px)',
+                      boxShadow: `0 0 8px ${label.colour}`,
+                    }}
+                  />
+
+                  {/* Label card */}
+                  <div
+                    className={`relative px-3 py-2 rounded-xl border backdrop-blur-md transition-all duration-200 ${
+                      isActive ? 'scale-110' : 'hover:scale-105'
+                    }`}
+                    style={{
+                      backgroundColor: `${label.colour}18`,
+                      borderColor: `${label.colour}50`,
+                      boxShadow: isActive ? `0 0 20px ${label.colour}40` : `0 4px 12px rgba(0,0,0,0.3)`,
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4 flex-shrink-0" style={{ color: label.colour }} />
+                      <div>
+                        <p className="text-white font-bold text-xs leading-tight whitespace-nowrap">{label.text}</p>
+                        {(isActive || label.size === 'large') && (
+                          <p className="text-[#a8bfd4] text-[10px] leading-tight whitespace-nowrap">{label.sub}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Zoom Level Indicator */}
-          <div className="absolute top-3 left-3 bg-[rgba(10,22,40,0.85)] backdrop-blur-sm px-3 py-1.5 rounded-lg border border-[#48d1cc]/20">
+          {/* Zoom Level */}
+          <div className="absolute top-3 left-3 bg-[rgba(10,22,40,0.85)] backdrop-blur-sm px-3 py-1.5 rounded-lg border border-[#48d1cc]/20 z-40">
             <span className="text-[#48d1cc] text-xs font-mono font-bold">{Math.round(zoom * 100)}%</span>
           </div>
 
           {/* Zoom Controls */}
-          <div className="absolute bottom-3 right-3 flex flex-col gap-2">
+          <div className="absolute bottom-3 right-3 flex flex-col gap-2 z-40">
             <Button
               size="icon"
               onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}
@@ -207,21 +281,32 @@ export default function MapPage() {
 
           {/* Pan hint */}
           {zoom > 1 && (
-            <div className="absolute bottom-3 left-3 bg-[rgba(10,22,40,0.85)] backdrop-blur-sm px-3 py-1.5 rounded-lg border border-[#48d1cc]/20 animate-pulse">
+            <div className="absolute bottom-3 left-3 bg-[rgba(10,22,40,0.85)] backdrop-blur-sm px-3 py-1.5 rounded-lg border border-[#48d1cc]/20 animate-pulse z-40">
               <span className="text-[#a8bfd4] text-xs">Drag to pan &bull; Double-tap to zoom</span>
             </div>
           )}
         </div>
 
-        {/* Map Legend / Quick Guide */}
+        {/* Map Legend */}
         <div className="flex flex-wrap gap-2 mb-6 justify-center">
           {LOCATIONS.map((s) => {
             const SIcon = s.icon;
             return (
-              <div key={s.sector} className="flex items-center gap-1.5 bg-[rgba(255,255,255,0.05)] px-3 py-1.5 rounded-full border border-[rgba(75,130,180,0.15)]">
+              <button
+                key={s.sector}
+                onClick={() => {
+                  const id = s.sector.toLowerCase().split(' ')[0];
+                  setActiveLabel(activeLabel === id ? null : id);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all ${
+                  activeLabel === s.sector.toLowerCase().split(' ')[0]
+                    ? 'bg-[rgba(255,255,255,0.1)] border-[#48d1cc]/50'
+                    : 'bg-[rgba(255,255,255,0.03)] border-[rgba(75,130,180,0.15)] hover:bg-[rgba(255,255,255,0.08)]'
+                }`}
+              >
                 <SIcon className="w-3.5 h-3.5" style={{ color: s.colour }} />
                 <span className="text-white text-xs font-medium">{s.sector.replace(' Sector', '')}</span>
-              </div>
+              </button>
             );
           })}
         </div>
