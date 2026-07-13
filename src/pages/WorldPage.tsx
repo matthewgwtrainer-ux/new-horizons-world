@@ -437,8 +437,8 @@ export default function WorldPage() {
           <TabsContent value="citizens" className="animate-fade-in">
             {/* Citizens Hero Banner */}
             <div className="relative rounded-2xl overflow-hidden mb-4 border border-[#48d1cc]/20">
-              <img src="/citizens-hero.jpg" alt="The Citizens of New Horizon Island" className="w-full h-44 md:h-56 object-cover object-top" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] via-[#0a1628]/50 to-transparent" />
+              <img src="/citizens-hero.jpg" alt="The Citizens of New Horizon Island" className="w-full h-72 md:h-96 object-cover object-center" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] via-[#0a1628]/30 to-transparent" />
               <div className="absolute bottom-3 left-4 right-4">
                 <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg">Meet the Citizens</h2>
                 <p className="text-sm text-[#a8bfd4] drop-shadow">Choose a citizen and start your investigation</p>
