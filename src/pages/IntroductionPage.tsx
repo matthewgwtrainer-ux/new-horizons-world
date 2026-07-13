@@ -289,6 +289,11 @@ export default function IntroductionPage() {
           </div>
         </section>
 
+        {/* Banner: Something is Wrong */}
+        <div className="rounded-2xl overflow-hidden mb-4 border border-[#ffd166]/20">
+          <img src="/intro-something-wrong.jpg" alt="Something is wrong on the island" className="w-full h-48 md:h-64 object-cover" />
+        </div>
+
         {/* ===== THE PROBLEMS ===== */}
         <section className={`animate-slide-up transition-all duration-500 ${isActiveSection(3) ? 'bg-[rgba(72,209,204,0.08)] -mx-4 px-4 py-4 rounded-xl border border-[#48d1cc]/20' : ''}`}>
           <div className="glass-panel p-6 md:p-8 border-l-4 border-[#ffd166]">
@@ -313,6 +318,11 @@ export default function IntroductionPage() {
             </div>
           </div>
         </section>
+
+        {/* Banner: Red Herrings */}
+        <div className="rounded-2xl overflow-hidden mb-4 border border-[#ff6b6b]/20">
+          <img src="/intro-red-herrings.jpg" alt="Not everything is what it seems" className="w-full h-48 md:h-64 object-cover" />
+        </div>
 
         {/* ===== RED HERRINGS / FAKE CLUES ===== */}
         <section className={`animate-slide-up transition-all duration-500 ${isActiveSection(4) ? 'bg-[rgba(255,107,107,0.06)] -mx-4 px-4 py-4 rounded-xl border border-[#ff6b6b]/20' : ''}`}>
@@ -342,6 +352,11 @@ export default function IntroductionPage() {
           </div>
         </section>
 
+        {/* Banner: World Council */}
+        <div className="rounded-2xl overflow-hidden mb-4 border border-[#48d1cc]/20">
+          <img src="/intro-world-council.jpg" alt="The World Council" className="w-full h-48 md:h-64 object-cover" />
+        </div>
+
         {/* ===== THE WORLD COUNCIL ===== */}
         <section className={`animate-slide-up transition-all duration-500 ${isActiveSection(5) ? 'bg-[rgba(72,209,204,0.08)] -mx-4 px-4 py-4 rounded-xl border border-[#48d1cc]/20' : ''}`}>
           <div className="glass-panel p-6 md:p-8 border-l-4 border-[#48d1cc]">
@@ -359,6 +374,11 @@ export default function IntroductionPage() {
             </div>
           </div>
         </section>
+
+        {/* Banner: Your Journey */}
+        <div className="rounded-2xl overflow-hidden mb-4 border border-[#48d1cc]/20">
+          <img src="/intro-journey.jpg" alt="Your 8-session journey across the island" className="w-full h-48 md:h-64 object-cover" />
+        </div>
 
         {/* ===== YOUR JOURNEY ===== */}
         <section className={`animate-slide-up transition-all duration-500 ${isActiveSection(6) ? 'bg-[rgba(72,209,204,0.08)] -mx-4 px-4 py-4 rounded-xl border border-[#48d1cc]/20' : ''}`}>
@@ -394,6 +414,11 @@ export default function IntroductionPage() {
           </div>
         </section>
 
+        {/* Banner: How It Works */}
+        <div className="rounded-2xl overflow-hidden mb-4 border border-[#48d1cc]/20">
+          <img src="/intro-how-it-works.jpg" alt="How the app works" className="w-full h-48 md:h-64 object-cover" />
+        </div>
+
         {/* ===== HOW IT WORKS ===== */}
         <section className={`animate-slide-up transition-all duration-500 ${isActiveSection(7) || isActiveSection(8) ? 'bg-[rgba(72,209,204,0.08)] -mx-4 px-4 py-4 rounded-xl border border-[#48d1cc]/20' : ''}`}>
           <div className="glass-panel p-6 md:p-8">
@@ -420,6 +445,11 @@ export default function IntroductionPage() {
             </div>
           </div>
         </section>
+
+        {/* Banner: Ready to Begin */}
+        <div className="rounded-2xl overflow-hidden mb-4 border border-[#48d1cc]/20">
+          <img src="/intro-ready.jpg" alt="Ready to begin your adventure" className="w-full h-48 md:h-64 object-cover" />
+        </div>
 
         {/* ===== READY TO BEGIN ===== */}
         <section className="text-center pb-8 animate-slide-up">
