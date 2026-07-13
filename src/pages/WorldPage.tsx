@@ -258,6 +258,12 @@ export default function WorldPage() {
     setChatError('')
 
     try {
+      // Build conversation history for the AI (exclude the message we just added)
+      const conversationHistory = chatMessages.map((msg) => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+      }))
+
       const result = await chatMutation.mutateAsync({
         citizenName: selectedCitizen,
         sectorName: selectedSector.name,
@@ -270,6 +276,7 @@ export default function WorldPage() {
         sessionTitle: currentSession?.title || 'Investigating the island',
         sessionNumber: world?.currentSession || 1,
         sectorId: selectedSectorId,
+        conversationHistory,
       })
 
       if (result.error) {
