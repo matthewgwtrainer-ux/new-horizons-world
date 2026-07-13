@@ -367,7 +367,7 @@ export default function IntroductionPage() {
               <p>The World Council has chosen <span className="text-white font-medium">your team</span> to investigate
                 one sector of New Horizon Island. You will become the experts in your sector. You will interview
                 AI citizens, examine evidence, solve problems, and report back to the Council — all remotely from Hong Kong.</p>
-              <p>Each week, the Council will give your team a new mission. You will use the AI Command Centre
+              <p>Each week, the Council will give your team a new mission. You will use the Meet the Citizens tab
                 to message AI citizens directly, ask them questions in English, and discover what is really happening on the island.</p>
               <p className="text-white font-medium">Your English is not just a school subject here. It is the tool you use to investigate,
                 understand, and help solve the mysteries of the island.</p>
