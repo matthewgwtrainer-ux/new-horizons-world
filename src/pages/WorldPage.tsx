@@ -50,6 +50,21 @@ const CITIZENS: Record<string, { name: string; role: string }[]> = {
   ],
 }
 
+const CITIZEN_IMAGES: Record<string, string> = {
+  'Harbour Manager': '/citizens/carlos-marin.png',
+  'Ferry Pilot': '/citizens/mei-lin.png',
+  'Supply Robot': '/citizens/supply-robot.png',
+  'Botanist': '/citizens/dr-aria-green.png',
+  'Water Keeper': '/citizens/kai-ocean.png',
+  'Animal Helper': '/citizens/nia-patel.png',
+  'Engineer': '/citizens/malik-okafor.png',
+  'Repair Robot': '/citizens/zara-kim.png',
+  'Signal Officer': '/citizens/ren-sakai.png',
+  'Archivist': '/citizens/mira-lee.png',
+  'Young Reporter': '/citizens/sofia-cruz.png',
+  'Council Guide': '/citizens/leo-walker.png',
+}
+
 interface ChatMessage {
   id: number
   role: 'user' | 'assistant'
@@ -430,17 +445,43 @@ export default function WorldPage() {
                       <button
                         key={citizen.name}
                         onClick={() => { setSelectedCitizen(citizen.name); setChatMessages([]); setChatError('') }}
-                        className={`p-3 rounded-lg border text-left transition-all ${
+                        className={`p-2 rounded-lg border text-left transition-all ${
                           selectedCitizen === citizen.name
                             ? 'border-[#48d1cc] bg-[rgba(72,209,204,0.12)]'
                             : 'border-[rgba(75,130,180,0.25)] hover:border-[#48d1cc]/50 bg-[rgba(255,255,255,0.03)]'
                         }`}
                       >
-                        <User className="w-4 h-4 text-[#48d1cc] mb-1" />
-                        <p className="text-sm text-white font-medium">{citizen.name}</p>
-                        <p className="text-xs text-[#a8bfd4]">{citizen.role}</p>
+                        <div className="w-10 h-10 rounded-lg overflow-hidden mb-2 bg-[rgba(8,22,36,0.9)] border border-[#48d1cc]/20">
+                          <img
+                            src={CITIZEN_IMAGES[citizen.name] || ''}
+                            alt={citizen.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                          />
+                        </div>
+                        <p className="text-sm text-white font-medium leading-tight">{citizen.name}</p>
+                        <p className="text-xs text-[#a8bfd4] leading-tight mt-0.5">{citizen.role}</p>
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                {/* Citizen Portrait Card */}
+                <div className="glass-panel p-4 mb-4 flex items-center gap-4">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 border-[#48d1cc]/30 flex-shrink-0 bg-[rgba(8,22,36,0.9)]">
+                    <img
+                      src={CITIZEN_IMAGES[selectedCitizen] || ''}
+                      alt={selectedCitizen}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-white font-bold text-lg">{selectedCitizen}</h3>
+                    <p className="text-sm text-[#a8bfd4]">
+                      {sectorCitizens.find((c: any) => c.name === selectedCitizen)?.role}
+                    </p>
+                    <p className="text-xs text-[#48d1cc] mt-1">{selectedSector?.name}</p>
                   </div>
                 </div>
 
