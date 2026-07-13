@@ -324,9 +324,6 @@ export default function WorldPage() {
             <span className="text-xs text-[#48d1cc] bg-[#48d1cc]/10 px-2 py-1 rounded-full border border-[#48d1cc]/30">Session {world.currentSession}</span>
           </div>
           <p className="hidden md:block text-sm text-[#a8bfd4] italic">{world.tagline}</p>
-          <div className="text-xs text-[#48d1cc] bg-[#48d1cc]/10 px-3 py-1.5 rounded-full border border-[#48d1cc]/30">
-            {selectedTeam?.name || 'Select a Sector'}
-          </div>
         </div>
       </header>
 
