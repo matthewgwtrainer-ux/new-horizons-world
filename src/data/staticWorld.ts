@@ -203,7 +203,7 @@ export const staticSessions: StaticSession[] = [
 export const staticLogs: StaticLog[] = [
   {
     id: 1, sessionId: 1, sectorId: "all", type: "World Update",
-    entry: "World Council teams arrived at New Horizon Island.",
+    entry: "World Council teams established remote communication with New Horizon Island.",
     addedBy: "Teacher", visibility: "Public", createdAt: new Date().toISOString(),
   },
   {

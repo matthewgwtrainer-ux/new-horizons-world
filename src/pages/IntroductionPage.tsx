@@ -36,8 +36,8 @@ const SECTOR_DATA = [
 ]
 
 const JOURNEY_STEPS = [
-  { session: 1, title: 'Arrival at New Horizon Island', icon: MapPin,
-    description: 'Meet your team, explore your sector, and investigate your first mystery. Learn how to use English to ask AI citizens questions.',
+  { session: 1, title: 'First Contact with New Horizon Island', icon: MapPin,
+    description: 'Meet your team, begin your remote investigation of your sector, and solve your first mystery. Learn how to use English to ask AI citizens questions.',
     output: 'Sector mission card and first spoken/written update' },
   { session: 2, title: 'Meet the Citizens', icon: Users,
     description: 'Interview AI citizens using English questions. Collect character profiles and discover hidden clues. Practice asking who, what, where, when, why, and how.',
@@ -58,20 +58,20 @@ const JOURNEY_STEPS = [
     description: 'Write and rehearse a Day C-style news broadcast script. Assign roles: anchor, reporter, interviewer. Practice spoken English.',
     output: 'Broadcast script with anchor, reporter, and interview segments' },
   { session: 8, title: 'Final Broadcast & Reflection', icon: Radio,
-    description: 'Perform your live news broadcast in English! Reflect on how your English helped you explore, understand, and improve the island.',
+    description: 'Perform your live news broadcast in English! Reflect on how your English helped you investigate, understand, and help solve the mysteries of the island.',
     output: 'Video news broadcast and reflection worksheet' },
 ]
 
 // All text sections for text-to-speech
 const SPEECH_SECTIONS = [
-  "Welcome to New Horizon Island. A mysterious artificial island has appeared near Hong Kong. It already has buildings, robots, citizens, problems, and secrets. You are part of the World Council.",
-  "New Horizon Island is a near-future artificial island that has appeared in the waters near Hong Kong. It is partly built, partly broken, and partly mysterious. The island is divided into four sectors, each with its own buildings, AI citizens, and problems. The World Council has invited teams of student investigators to inspect the island, solve its problems, and help it thrive. But here is the challenge: the island will only respond to you if you use clear, thoughtful English. Your words are the key to unlocking its secrets.",
+  "Welcome to the New Horizon Island Investigation. A mysterious artificial island has appeared near Hong Kong. It already has buildings, robots, citizens, problems, and secrets. You are part of the World Council, investigating remotely from the mainland.",
+  "New Horizon Island is a near-future artificial island that has appeared in the waters near Hong Kong. It is partly built, partly broken, and partly mysterious. The island is divided into four sectors, each with its own buildings, AI citizens, and problems. The World Council has invited teams of student investigators to investigate the island remotely, solve its problems, and help it thrive. But here is the challenge: the island will only respond to you if you use clear, thoughtful English. Your words are the key to unlocking its secrets.",
   "The Four Sectors. Harbour Sector: responsible for transport, supplies, visitors, and trade. Citizens include the Harbour Manager, Ferry Pilot, and Supply Robot. Problem: supply boxes arrived with no sender. Mystery: who sent the boxes and why? Garden Sector: responsible for food, water, plants, animals, and health. Citizens include the Botanist, Water Keeper, and Animal Helper. Problem: plants are growing too fast. Mystery: what is causing the strange growth? Tech Sector: responsible for power, robots, communication, and repairs. Citizens include the Engineer, Repair Robot, and Signal Officer. Problem: the Signal Tower sends messages by itself. Mystery: who or what is using the tower? Culture Sector: responsible for history, citizens, news, and rules. Citizens include the Archivist, Young Reporter, and Council Guide. Problem: nobody knows who built the island. Mystery: who built New Horizon Island?",
   "Something is wrong. The island should be ready for visitors. But it is not. Strange things are happening in every sector. Supply boxes arrive with no sender. Plants grow impossibly fast. The Signal Tower sends messages in the middle of the night. And nobody, not even the AI citizens, knows who built the island or why it was left unfinished.",
   "The World Council needs investigators who can use English to ask clear questions to AI citizens, collect evidence and write reports, discuss problems and propose solutions, work together across sector teams, and communicate findings to the Council.",
   "Warning: not everything is what it seems. The World Council has found Investigation Cards scattered across the island — clues, characters, and mission briefings left behind by someone. Some cards contain real evidence. But the Council has discovered that other cards are fake — planted deliberately to confuse investigators. Who would plant fake clues? And why? This means you cannot believe everything you read. You must compare what the cards say with what the AI citizens tell you. If a citizen does not recognise a clue, it might be a red herring — a trick designed to lead you astray. Use your detective skills. Trust the citizens. Question everything.",
-  "The World Council has chosen your team to investigate one sector of New Horizon Island. You will become the experts in your sector. You will interview AI citizens, examine evidence, solve problems, and report back to the Council. Each week, the Council will give your team a new mission. You will use the AI Command Centre to build English prompts, question AI citizens, and discover what is really happening on the island. Your English is not just a school subject here. It is the tool you use to explore, understand, and improve the world.",
-  "Your Journey. Session 1: Arrival at New Horizon Island. Meet your team, explore your sector, and investigate your first mystery. Session 2: Meet the Citizens. Interview AI citizens using English questions. Session 3: First Sector Problems. Investigate the problems in your sector and write your first report. Session 4: World Council Meeting. Present your findings to the other teams. Session 5: Island Development. Propose improvements for your sector. Session 6: Newsroom Day. Become journalists and write news articles. Session 7: Broadcast Preparation. Write and rehearse a news broadcast script. Session 8: Final Broadcast and Reflection. Perform your live news broadcast in English.",
+  "The World Council has chosen your team to investigate one sector of New Horizon Island. You will become the experts in your sector. You will interview AI citizens, examine evidence, solve problems, and report back to the Council — all remotely from Hong Kong. Each week, the Council will give your team a new mission. You will use the AI Command Centre to build English prompts, question AI citizens, and discover what is really happening on the island. Your English is not just a school subject here. It is the tool you use to investigate, understand, and help solve the mysteries of the island.",
+  "Your Journey. Session 1: First Contact with New Horizon Island. Meet your team, begin your remote investigation of your sector, and solve your first mystery. Session 2: Meet the Citizens. Interview AI citizens using English questions. Session 3: First Sector Problems. Investigate the problems in your sector and write your first report. Session 4: World Council Meeting. Present your findings to the other teams. Session 5: Island Development. Propose improvements for your sector. Session 6: Newsroom Day. Become journalists and write news articles. Session 7: Broadcast Preparation. Write and rehearse a news broadcast script. Session 8: Final Broadcast and Reflection. Perform your live news broadcast in English.",
   "How the App Works. The Dashboard shows your sector, the mission, the world event log, and English help with sentence starters. The AI Command tab lets you build a prompt in English, speak or type your question, copy it, and paste it into ChatGPT or Kimi to talk to AI citizens. The Newsroom lets you write and submit reports, and read reports from other teams.",
   "The Golden Rule: every action in the world must produce an English output. Whether you are asking a question, writing a report, or making a decision, your English is what makes the world respond. The better your English, the more the world reveals.",
 ]
@@ -366,11 +366,11 @@ export default function IntroductionPage() {
             <div className="space-y-4 text-[#a8bfd4] leading-relaxed">
               <p>The World Council has chosen <span className="text-white font-medium">your team</span> to investigate
                 one sector of New Horizon Island. You will become the experts in your sector. You will interview
-                AI citizens, examine evidence, solve problems, and report back to the Council.</p>
+                AI citizens, examine evidence, solve problems, and report back to the Council — all remotely from Hong Kong.</p>
               <p>Each week, the Council will give your team a new mission. You will use the AI Command Centre
                 to build English prompts, question AI citizens, and discover what is really happening on the island.</p>
-              <p className="text-white font-medium">Your English is not just a school subject here. It is the tool you use to explore,
-                understand, and improve the world.</p>
+              <p className="text-white font-medium">Your English is not just a school subject here. It is the tool you use to investigate,
+                understand, and help solve the mysteries of the island.</p>
             </div>
           </div>
         </section>
