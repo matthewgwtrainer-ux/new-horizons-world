@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Compass, Sparkles, ArrowRight, BookOpen, Shield, Layers } from 'lucide-react'
+import { Compass, Sparkles, ArrowRight, BookOpen, Shield, Layers, Map } from 'lucide-react'
 
 export default function LandingPage() {
   const navigate = useNavigate()
@@ -59,8 +59,8 @@ export default function LandingPage() {
           </p>
         </div>
 
-        {/* Three action buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 animate-slide-up">
+        {/* Five action buttons */}
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 animate-slide-up justify-center">
           {/* Introduction Button — PRIMARY for Session 1 */}
           <Button
             size="lg"
@@ -103,6 +103,15 @@ export default function LandingPage() {
           >
             <Layers className="w-5 h-5 mr-2" />
             Cards
+          </Button>
+
+          <Button
+            size="lg"
+            onClick={() => navigate('/map')}
+            className="bg-[#4ade80] hover:bg-[#3ecf6f] text-[#0a1628] font-bold px-6 py-6 text-base rounded-xl transition-all hover:scale-105"
+          >
+            <Map className="w-5 h-5 mr-2" />
+            Island Map
           </Button>
 
           <Button
