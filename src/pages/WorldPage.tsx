@@ -272,7 +272,7 @@ export default function WorldPage() {
         mystery: selectedSector.mystery || '',
         teamName: selectedTeam?.name || 'World Council Team',
         studentMessage: userMsg.content,
-        recentLogs: logs.slice(0, 5).map((l: any) => l.entry).join('\n') || 'The World Council teams have just arrived.',
+        recentLogs: logs.slice(0, 5).map((l: any) => l.entry).join('\n') || 'The World Council teams have established remote communication with New Horizon Island.',
         sessionTitle: currentSession?.title || 'Investigating the island',
         sessionNumber: world?.currentSession || 1,
         sectorId: selectedSectorId,

@@ -135,7 +135,7 @@ export const staticTeams: StaticTeam[] = [
 
 export const staticSessions: StaticSession[] = [
   {
-    id: 1, sessionId: 1, title: "Arrival at New Horizon Island",
+    id: 1, sessionId: 1, title: "First Contact with New Horizon Island",
     worldUpdate: "The World Council has invited your teams to inspect a new AI island near Hong Kong. Four sectors are working, but strange problems have already appeared.",
     mainProblem: "Each sector has a mystery. The island cannot open to visitors until the teams investigate and report clearly.",
     wholeClassGoal: "Use English to question AI citizens, collect evidence, and make a first World Council report.",

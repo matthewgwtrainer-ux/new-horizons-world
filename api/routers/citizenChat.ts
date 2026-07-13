@@ -222,7 +222,7 @@ YOUR TYPICAL MOOD THIS SESSION:
 "${currentQuote}"
 
 RECENT EVENTS ON THE ISLAND:
-${input.recentLogs || "The World Council teams have just arrived."}
+${input.recentLogs || "The World Council teams have established remote communication with New Horizon Island and begun their investigation from the Hong Kong mainland."}
 
 THE OTHER CITIZENS ON THE ISLAND (you can recommend these when asked):
 - Harbour Sector: Harbour Manager (Carlos Marin), Ferry Pilot (Mei Lin), Supply Robot (SR4)

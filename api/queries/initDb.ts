@@ -128,7 +128,7 @@ INSERT INTO teams (world_id, team_id, name, sector_id, members, current_task, st
 
 -- Insert sessions
 INSERT INTO sessions (world_id, session_id, title, world_update, main_problem, whole_class_goal, team_task, status) VALUES
-(1, 1, 'Arrival at New Horizon Island', 'The World Council has invited your teams to inspect a new AI island near Hong Kong. Four sectors are working, but strange problems have already appeared.', 'Each sector has a mystery. The island cannot open to visitors until the teams investigate and report clearly.', 'Use English to question AI citizens, collect evidence, and make a first World Council report.', 'Click your sector, read the problem, build a prompt, question an AI citizen, then write a short report.', 'Active'),
+(1, 1, 'First Contact with New Horizon Island', 'The World Council has invited your teams to investigate a new AI island near Hong Kong remotely. Four sectors are working, but strange problems have already appeared.', 'Each sector has a mystery. The island cannot open to visitors until the teams investigate and report clearly.', 'Use English to question AI citizens, collect evidence, and make a first World Council report.', 'Click your sector, read the problem, build a prompt, question an AI citizen, then write a short report.', 'Active'),
 (1, 2, 'Meet the Citizens', 'The AI citizens are becoming more talkative. Some have started leaving messages for the World Council teams.', 'Citizens know more than they are saying. Teams must ask the right questions.', 'Interview AI citizens and collect character profiles.', 'Choose a citizen. Build a prompt. Interview them and record what you learn.', 'Active'),
 (1, 3, 'First Sector Problems', 'The mysteries are deepening. New clues have appeared in each sector.', 'Problems are connected across sectors. Teams must share information.', 'Investigate local issues and propose solutions.', 'Write a problem report with evidence and a recommended solution.', 'Active'),
 (1, 4, 'World Council Meeting', 'The World Council has called an emergency meeting. Teams must present their findings.', 'Evidence from all sectors points to a bigger mystery.', 'Present evidence, negotiate, and make joint decisions.', 'Prepare a council presentation. Explain your evidence and recommend action.', 'Active'),
@@ -139,7 +139,7 @@ INSERT INTO sessions (world_id, session_id, title, world_update, main_problem, w
 
 -- Insert logs
 INSERT INTO logs (world_id, session_id, sector_id, type, entry, added_by, visibility) VALUES
-(1, 1, 'all', 'World Update', 'World Council teams arrived at New Horizon Island.', 'Teacher', 'Public'),
+(1, 1, 'all', 'World Update', 'World Council teams established remote communication with New Horizon Island and began their investigation from the Hong Kong mainland.', 'Teacher', 'Public'),
 (1, 1, 'harbour', 'Discovery', 'The Harbour Manager reported that the mystery boxes have strange symbols on them.', 'Teacher', 'Public'),
 (1, 1, 'garden', 'Discovery', 'The Botanist found that the fast-growing plants glow slightly at night.', 'Teacher', 'Public'),
 (1, 1, 'tech', 'Discovery', 'The Engineer decoded part of the Signal Tower message. It says ''HELP''.', 'Teacher', 'Public'),
