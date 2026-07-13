@@ -7,15 +7,15 @@ const MAP_LABELS = [
   // Sectors (large labels)
   { id: 'garden', text: 'Garden Sector', sub: 'Dr. Aria Green \u00b7 Kai Ocean \u00b7 Nia Patel', x: 72, y: 28, colour: '#4ade80', icon: Leaf, size: 'large' },
   { id: 'tech', text: 'Tech Sector', sub: 'Malik Okafor \u00b7 Zara Kim \u00b7 Ren Sakai', x: 72, y: 72, colour: '#c084fc', icon: Cpu, size: 'large' },
-  { id: 'harbour', text: 'Harbour Sector', sub: 'Carlos Marin \u00b7 Mei Lin \u00b7 SR4', x: 20, y: 72, colour: '#60a5fa', icon: Anchor, size: 'large' },
-  { id: 'culture', text: 'Culture Sector', sub: 'Mira Lee \u00b7 Sofia Cruz \u00b7 Leo Walker', x: 20, y: 28, colour: '#fbbf24', icon: BookOpen, size: 'large' },
+  { id: 'harbour', text: 'Harbour Sector', sub: 'Carlos Marin \u00b7 Mei Lin \u00b7 SR4', x: 20, y: 28, colour: '#60a5fa', icon: Anchor, size: 'large' },
+  { id: 'culture', text: 'Culture Sector', sub: 'Mira Lee \u00b7 Sofia Cruz \u00b7 Leo Walker', x: 20, y: 72, colour: '#fbbf24', icon: BookOpen, size: 'large' },
   // Central plaza
   { id: 'plaza', text: 'Central Plaza', sub: 'All roads meet here', x: 50, y: 50, colour: '#ffffff', icon: MapPin, size: 'medium' },
   // Key landmarks
   { id: 'signal', text: 'Signal Tower', sub: 'Midnight transmissions', x: 78, y: 55, colour: '#c084fc', icon: Radio, size: 'small' },
   { id: 'tree', text: 'Great Tree', sub: 'Bioluminescent canopy', x: 65, y: 18, colour: '#4ade80', icon: Leaf, size: 'small' },
-  { id: 'dock', text: 'Harbour Dock', sub: 'Mystery boxes appeared here', x: 12, y: 62, colour: '#60a5fa', icon: Ship, size: 'small' },
-  { id: 'temple', text: 'Archive Hall', sub: 'Missing construction records', x: 15, y: 38, colour: '#fbbf24', icon: Scroll, size: 'small' },
+  { id: 'dock', text: 'Harbour Dock', sub: 'Mystery boxes appeared here', x: 12, y: 38, colour: '#60a5fa', icon: Ship, size: 'small' },
+  { id: 'temple', text: 'Archive Hall', sub: 'Missing construction records', x: 15, y: 62, colour: '#fbbf24', icon: Scroll, size: 'small' },
 ];
 
 const LOCATIONS = [
