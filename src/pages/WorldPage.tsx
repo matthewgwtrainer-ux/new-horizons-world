@@ -585,6 +585,15 @@ export default function WorldPage() {
 
           {/* NEWSROOM TAB */}
           <TabsContent value="newsroom" className="animate-fade-in">
+            {/* Newsroom Hero Banner */}
+            <div className="relative rounded-2xl overflow-hidden mb-4 border border-[#48d1cc]/20">
+              <img src="/newsroom-hero.jpg" alt="World Council Newsroom" className="w-full h-40 md:h-52 object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] via-[#0a1628]/60 to-transparent" />
+              <div className="absolute bottom-3 left-4 right-4">
+                <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg">World Council Newsroom</h2>
+                <p className="text-sm text-[#a8bfd4] drop-shadow">Submit your team's findings and read reports from other sectors</p>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="glass-panel p-4">
                 <h2 className="text-lg font-bold text-[#48d1cc] mb-4">Submit a Report</h2>
