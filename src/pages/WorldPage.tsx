@@ -360,7 +360,7 @@ export default function WorldPage() {
                   {sectors.map((sector: any) => {
                     const Icon = SECTOR_ICONS[sector.sectorId] || Ship
                     return (
-                      <button key={sector.sectorId} onClick={() => setSelectedSectorId(sector.sectorId)}
+                      <button key={sector.sectorId} onClick={() => { setSelectedSectorId(sector.sectorId); const matchingTeam = teams.find((t: any) => t.sectorId === sector.sectorId); if (matchingTeam) setSelectedTeamId(matchingTeam.teamId); }}
                         className={`sector-card w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3 ${selectedSectorId === sector.sectorId ? 'border-[#48d1cc] bg-[rgba(72,209,204,0.12)]' : 'border-[rgba(75,130,180,0.25)] hover:border-[#48d1cc]/50'}`}>
                         <Icon className="w-5 h-5 flex-shrink-0" style={{ color: SECTOR_COLORS[sector.sectorId] || '#48d1cc' }} />
                         <span className="text-white font-medium text-sm">{sector.name}</span>
