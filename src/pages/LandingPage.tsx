@@ -125,6 +125,24 @@ export default function LandingPage() {
           </Button>
         </div>
 
+        {/* Trailer Video */}
+        <div className="mt-8 w-full max-w-2xl">
+          <div className="rounded-2xl overflow-hidden border border-[#48d1cc]/20 shadow-lg shadow-[#48d1cc]/5">
+            <div className="relative aspect-video bg-black">
+              <iframe
+                src="https://www.youtube.com/embed/prw633AINLc"
+                title="New Horizon Island Trailer"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              />
+            </div>
+          </div>
+          <p className="text-center text-xs text-[#a8bfd4]/50 mt-2">
+            Watch the official trailer before you begin your investigation
+          </p>
+        </div>
+
         {/* Default hint */}
         <p className="mt-5 text-sm text-[#a8bfd4]/60">
           New to the project? Start with <span className="text-[#ffd166]">Introduction</span>
