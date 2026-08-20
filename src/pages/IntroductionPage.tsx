@@ -214,7 +214,7 @@ export default function IntroductionPage() {
           <div className="rounded-2xl overflow-hidden border border-[#48d1cc]/30 shadow-2xl shadow-[#48d1cc]/10 mb-6">
             <img src="/island-hero.jpg" alt="New Horizon Island" className="w-full h-56 md:h-80 object-cover" />
           </div>
-          <div className="rounded-2xl overflow-hidden border border-[#48d1cc]/30 mb-8 aspect-video">
+          <div className="rounded-2xl overflow-hidden border border-[#48d1cc]/30 mb-6 aspect-video">
             <iframe
               src="https://www.youtube.com/embed/lBtH4pVAX2Q"
               title="New Horizon Island Introduction"
@@ -222,6 +222,24 @@ export default function IntroductionPage() {
               allowFullScreen
               className="w-full h-full"
             />
+          </div>
+
+          {/* Drone Flyover */}
+          <div className="rounded-2xl overflow-hidden border border-[#48d1cc]/30 mb-8 shadow-lg shadow-[#48d1cc]/5 relative">
+            <div className="absolute top-3 left-3 z-10">
+              <span className="bg-black/50 backdrop-blur-sm text-[#48d1cc] text-xs font-bold px-3 py-1 rounded-full border border-[#48d1cc]/30">
+                DRONE SURVEY — LIVE FEED
+              </span>
+            </div>
+            <video
+              src="/videos/drone-flyover.mp4"
+              className="w-full h-48 md:h-64 object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+            />
+            <audio src="/videos/drone-music.mp3" autoPlay loop muted />
           </div>
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 text-glow">
             Welcome to <span className="text-[#48d1cc]">New Horizon Island</span>
