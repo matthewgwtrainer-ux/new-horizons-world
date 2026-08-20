@@ -79,6 +79,7 @@ const SECTOR_PANELS: Record<string, { image: string; label: string }> = {
   'Tech Sector': { image: '/map/tech-panels.jpg', label: 'Signal Tower · Power Station · Robot Garage' },
   'Culture Sector': { image: '/map/culture-panels.jpg', label: 'Archive Hall · Council Hall · Visitor Centre' },
 };
+const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.5;
 
