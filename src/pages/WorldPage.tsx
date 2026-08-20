@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Ship, Leaf, Cpu, BookOpen, Send, Scroll, Lightbulb,
   Newspaper, Activity, MessageCircle, Mic, User, Bot,
-  WifiOff
+  WifiOff, Award
 } from 'lucide-react'
 import {
   staticWorld, staticSectors, staticTeams, staticSessions,
@@ -368,7 +368,7 @@ export default function WorldPage() {
                   <Award className="w-5 h-5" /> Investigation Progress
                 </h2>
                 <span className="text-xs text-[#a8bfd4] bg-[#48d1cc]/10 px-2 py-1 rounded-full border border-[#48d1cc]/20">
-                  {reports.length > 0 ? `${reports.length} Report${reports.length > 1 ? 's' : ''} Submitted` : 'No Reports Yet'}
+                  {allReports.length > 0 ? `${allReports.length} Report${allReports.length > 1 ? 's' : ''} Submitted` : 'No Reports Yet'}
                 </span>
               </div>
               <div className="relative">
@@ -376,7 +376,7 @@ export default function WorldPage() {
                 <div className="h-2 bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-[#48d1cc] to-[#ffd166] rounded-full transition-all duration-700"
-                    style={{ width: `${Math.min(((reports.length + chatMessages.length / 10) / 8) * 100, 100)}%` }}
+                    style={{ width: `${Math.min(((allReports.length + chatMessages.length / 10) / 8) * 100, 100)}%` }}
                   />
                 </div>
                 {/* Milestones */}
@@ -395,7 +395,7 @@ export default function WorldPage() {
                   })}
                 </div>
               </div>
-              {reports.length === 0 && (
+              {allReports.length === 0 && (
                 <p className="text-xs text-[#a8bfd4]/60 mt-2 text-center">
                   Submit your first report to the World Council to begin tracking your progress!
                 </p>
