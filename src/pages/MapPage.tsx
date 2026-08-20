@@ -73,7 +73,12 @@ const PATHS = [
   { label: 'Hidden Tunnel', desc: 'Underground passage from dock warehouse to garden storage' },
 ];
 
-const MIN_ZOOM = 1;
+const SECTOR_PANELS: Record<string, { image: string; label: string }> = {
+  'Harbour Sector': { image: '/map/harbour-panels.jpg', label: 'Harbour Dock · Warehouse · Ferry Terminal' },
+  'Garden Sector': { image: '/map/garden-panels.jpg', label: 'Greenhouse Dome · Water Reservoir · Animal Shelter' },
+  'Tech Sector': { image: '/map/tech-panels.jpg', label: 'Signal Tower · Power Station · Robot Garage' },
+  'Culture Sector': { image: '/map/culture-panels.jpg', label: 'Archive Hall · Council Hall · Visitor Centre' },
+};
 const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.5;
 
@@ -359,6 +364,24 @@ export default function MapPage() {
                 <h3 className="text-lg font-bold mb-3 flex items-center gap-2" style={{ color: sector.colour }}>
                   <SectorIcon className="w-5 h-5" /> {sector.sector}
                 </h3>
+
+                {/* Comic strip panels */}
+                {SECTOR_PANELS[sector.sector] && (
+                  <div className="mb-4 rounded-xl overflow-hidden border border-[rgba(75,130,180,0.2)] relative group">
+                    <img
+                      src={SECTOR_PANELS[sector.sector].image}
+                      alt={`${sector.sector} locations`}
+                      className="w-full h-auto object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2">
+                      <p className="text-[10px] text-[#a8bfd4] tracking-wider uppercase font-bold">
+                        {SECTOR_PANELS[sector.sector].label}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {sector.locations.map((loc) => {
                     const LocIcon = loc.icon;
