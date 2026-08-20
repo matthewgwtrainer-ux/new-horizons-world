@@ -5,6 +5,7 @@ import WorldPage from './pages/WorldPage'
 import TeacherPage from './pages/TeacherPage'
 import CardsPage from './pages/CardsPage'
 import MapPage from './pages/MapPage'
+import VideoMessagesPage from './pages/VideoMessagesPage'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/introduction" element={<IntroductionPage />} />
         <Route path="/cards" element={<CardsPage />} />
         <Route path="/map" element={<MapPage />} />
+        <Route path="/videos" element={<VideoMessagesPage />} />
         <Route path="/world/:code" element={<WorldPage />} />
         <Route path="/teacher/:code" element={<TeacherPage />} />
       </Routes>

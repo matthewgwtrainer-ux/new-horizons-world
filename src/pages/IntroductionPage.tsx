@@ -72,7 +72,7 @@ const SPEECH_SECTIONS = [
   "Warning: not everything is what it seems. The World Council has found Investigation Cards scattered across the island — clues, characters, and mission briefings left behind by someone. Some cards contain real evidence. But the Council has discovered that other cards are fake — planted deliberately to confuse investigators. Who would plant fake clues? And why? This means you cannot believe everything you read. You must compare what the cards say with what the AI citizens tell you. If a citizen does not recognise a clue, it might be a red herring — a trick designed to lead you astray. Use your detective skills. Trust the citizens. Question everything.",
   "The World Council has chosen your team to investigate one sector of New Horizon Island. You will become the experts in your sector. You will interview AI citizens, examine evidence, solve problems, and report back to the Council — all remotely from Hong Kong. Each week, the Council will give your team a new mission. You will use the Meet the Citizens tab to message AI citizens directly, ask them questions in English, and discover what is really happening on the island. Your English is not just a school subject here. It is the tool you use to investigate, understand, and help solve the mysteries of the island.",
   "Your Journey. Session 1: First Contact with New Horizon Island. Meet your team, begin your remote investigation of your sector, and solve your first mystery. Session 2: Meet the Citizens. Interview AI citizens using English questions. Session 3: First Sector Problems. Investigate the problems in your sector and write your first report. Session 4: World Council Meeting. Present your findings to the other teams. Session 5: Island Development. Propose improvements for your sector. Session 6: Newsroom Day. Become journalists and write news articles. Session 7: Broadcast Preparation. Write and rehearse a news broadcast script. Session 8: Final Broadcast and Reflection. Perform your live news broadcast in English.",
-  "How the App Works. The Dashboard shows your sector, the mission, the world event log, and English help with sentence starters. The Meet the Citizens tab lets you choose an AI citizen and message them directly — ask questions in English, and they will reply with clues and information. The Newsroom lets you write and submit reports, and read reports from other teams.",
+  "How the App Works. The Dashboard shows your sector, the mission, the world event log, and English help with sentence starters. The Meet the Citizens tab lets you choose an AI citizen and message them directly — ask questions in English, and they will reply with clues and information. The Newsroom lets you write and submit reports, and read reports from other teams. The Video Messages section contains damaged transmissions from AI citizens on the island — watch them for clues and information about the mysteries.",
   "The Golden Rule: every action in the world must produce an English output. Whether you are asking a question, writing a report, or making a decision, your English is what makes the world respond. The better your English, the more the world reveals.",
 ]
 
@@ -423,15 +423,23 @@ export default function IntroductionPage() {
         <section className={`animate-slide-up transition-all duration-500 ${isActiveSection(7) || isActiveSection(8) ? 'bg-[rgba(72,209,204,0.08)] -mx-4 px-4 py-4 rounded-xl border border-[#48d1cc]/20' : ''}`}>
           <div className="glass-panel p-6 md:p-8">
             <h2 className="text-2xl font-bold text-[#48d1cc] mb-4">How the App Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { title: 'Dashboard', desc: 'See your sector, read the mission, check the world event log, and get English help with sentence starters.', color: '#48d1cc' },
-                { title: 'Meet the Citizens', desc: 'Choose an AI citizen and message them directly. Ask questions in English and they will reply with clues, stories, and information about the island.', color: '#ffd166' },
-                { title: 'Newsroom', desc: 'Write and submit reports. Read reports from other teams. The teacher can add comments to your work.', color: '#4ade80' },
+                { title: 'Dashboard', desc: 'See your sector, read the mission, check the world event log, and get English help with sentence starters.', color: '#48d1cc', link: null },
+                { title: 'Meet the Citizens', desc: 'Choose an AI citizen and message them directly. Ask questions in English and they will reply with clues, stories, and information about the island.', color: '#ffd166', link: null },
+                { title: 'Newsroom', desc: 'Write and submit reports. Read reports from other teams. The teacher can add comments to your work.', color: '#4ade80', link: null },
+                { title: 'Video Messages', desc: 'Watch damaged transmissions from AI citizens on the island. See them speak, hear their warnings, and pick up clues the messages contain.', color: '#ff6b6b', link: '/videos' },
               ].map(card => (
-                <div key={card.title} className="bg-[rgba(255,255,255,0.03)] rounded-xl p-4 border border-[rgba(75,130,180,0.2)]">
+                <div
+                  key={card.title}
+                  className={`bg-[rgba(255,255,255,0.03)] rounded-xl p-4 border border-[rgba(75,130,180,0.2)] ${card.link ? 'hover:bg-[rgba(255,255,255,0.06)] hover:border-[#ff6b6b]/40 cursor-pointer transition-all' : ''}`}
+                  onClick={() => card.link && navigate(card.link)}
+                >
                   <h3 className="font-bold mb-2" style={{ color: card.color }}>{card.title}</h3>
                   <p className="text-sm text-[#a8bfd4]">{card.desc}</p>
+                  {card.link && (
+                    <p className="text-xs mt-2" style={{ color: card.color }}>Click to watch →</p>
+                  )}
                 </div>
               ))}
             </div>
