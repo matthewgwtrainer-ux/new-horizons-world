@@ -19,6 +19,25 @@ const MAP_LABELS = [
   { id: 'temple', text: 'Archive Hall', sub: 'Missing construction records', x: 15, y: 62, colour: '#fbbf24', icon: Scroll, size: 'small' },
 ];
 
+const CITIZEN_MARKERS = [
+  // Harbour Sector
+  { id: 'carlos', name: 'Carlos Marin', role: 'Harbour Manager', sector: 'harbour', x: 15, y: 22, image: '/citizens/carlos-marin.png', colour: '#60a5fa' },
+  { id: 'meilin', name: 'Mei Lin', role: 'Ferry Pilot', sector: 'harbour', x: 25, y: 18, image: '/citizens/mei-lin.png', colour: '#60a5fa' },
+  { id: 'malik', name: 'Malik', role: 'Supply Robot', sector: 'harbour', x: 18, y: 35, image: '/citizens/supply-robot.png', colour: '#60a5fa' },
+  // Garden Sector
+  { id: 'aria', name: 'Dr. Aria Green', role: 'Botanist', sector: 'garden', x: 68, y: 22, image: '/citizens/dr-aria-green.png', colour: '#4ade80' },
+  { id: 'nia', name: 'Nia Patel', role: 'Water Keeper', sector: 'garden', x: 75, y: 18, image: '/citizens/nia-patel.png', colour: '#4ade80' },
+  { id: 'sofia', name: 'Sofia Cruz', role: 'Animal Helper', sector: 'garden', x: 72, y: 35, image: '/citizens/sofia-cruz.png', colour: '#4ade80' },
+  // Tech Sector
+  { id: 'ren', name: 'Ren Sakai', role: 'Signal Officer', sector: 'tech', x: 68, y: 65, image: '/citizens/ren-sakai.png', colour: '#c084fc' },
+  { id: 'zara', name: 'Zara Kim', role: 'Repair Robot', sector: 'tech', x: 75, y: 68, image: '/citizens/zara-kim.png', colour: '#c084fc' },
+  { id: 'malik2', name: 'Malik', role: 'Engineer', sector: 'tech', x: 72, y: 78, image: '/citizens/malik-okafor.png', colour: '#c084fc' },
+  // Culture Sector
+  { id: 'mira', name: 'Mira Lee', role: 'Archivist', sector: 'culture', x: 15, y: 65, image: '/citizens/mira-lee.png', colour: '#fbbf24' },
+  { id: 'reporter', name: 'Young Reporter', role: 'Journalist', sector: 'culture', x: 25, y: 68, image: '/citizens/leo-walker.png', colour: '#fbbf24' },
+  { id: 'leo', name: 'Leo Walker', role: 'Council Guide', sector: 'culture', x: 18, y: 78, image: '/citizens/leo-walker.png', colour: '#fbbf24' },
+];
+
 const LOCATIONS = [
   {
     sector: 'Harbour Sector',
@@ -264,6 +283,34 @@ export default function MapPage() {
                 </div>
               );
             })}
+
+            {/* Citizen Markers */}
+            {showLabels && CITIZEN_MARKERS.map((citizen) => (
+              <div
+                key={citizen.id}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+                style={{ left: `${citizen.x}%`, top: `${citizen.y}%`, zIndex: 25 }}
+                onClick={(e) => { e.stopPropagation(); }}
+              >
+                <div className="relative">
+                  <img
+                    src={citizen.image}
+                    alt={citizen.name}
+                    className="w-8 h-8 rounded-full border-2 object-cover transition-transform group-hover:scale-125"
+                    style={{ borderColor: citizen.colour, boxShadow: `0 0 10px ${citizen.colour}80` }}
+                    loading="lazy"
+                  />
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full" style={{ backgroundColor: citizen.colour }} />
+                </div>
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <div className="bg-[rgba(10,22,40,0.95)] backdrop-blur-sm border border-[#48d1cc]/30 rounded-lg px-2 py-1 whitespace-nowrap">
+                    <p className="text-white text-[10px] font-bold">{citizen.name}</p>
+                    <p className="text-[#a8bfd4] text-[9px]">{citizen.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Zoom Level */}

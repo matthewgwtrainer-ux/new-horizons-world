@@ -360,6 +360,48 @@ export default function WorldPage() {
                 <p className="text-sm text-[#a8bfd4] drop-shadow">Your mission control centre for exploring New Horizon Island</p>
               </div>
             </div>
+
+            {/* Progress Tracker */}
+            <div className="glass-panel p-4 mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-bold text-[#48d1cc] flex items-center gap-2">
+                  <Award className="w-5 h-5" /> Investigation Progress
+                </h2>
+                <span className="text-xs text-[#a8bfd4] bg-[#48d1cc]/10 px-2 py-1 rounded-full border border-[#48d1cc]/20">
+                  {reports.length > 0 ? `${reports.length} Report${reports.length > 1 ? 's' : ''} Submitted` : 'No Reports Yet'}
+                </span>
+              </div>
+              <div className="relative">
+                {/* Progress bar background */}
+                <div className="h-2 bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#48d1cc] to-[#ffd166] rounded-full transition-all duration-700"
+                    style={{ width: `${Math.min(((reports.length + chatMessages.length / 10) / 8) * 100, 100)}%` }}
+                  />
+                </div>
+                {/* Milestones */}
+                <div className="flex justify-between mt-2">
+                  {sessions.map((session: any, idx: number) => {
+                    const isActive = session.sessionId === (currentSession?.sessionId || 1)
+                    const isCompleted = session.sessionId < (currentSession?.sessionId || 1)
+                    return (
+                      <div key={session.sessionId} className="flex flex-col items-center gap-1">
+                        <div className={`w-3 h-3 rounded-full border-2 transition-all ${isActive ? 'bg-[#48d1cc] border-[#48d1cc] scale-125 shadow shadow-[#48d1cc]/50' : isCompleted ? 'bg-[#ffd166] border-[#ffd166]' : 'bg-[#0a1628] border-[#48d1cc]/30'}`} />
+                        <span className={`text-[10px] font-bold ${isActive ? 'text-[#48d1cc]' : isCompleted ? 'text-[#ffd166]' : 'text-[#a8bfd4]/40'}`}>
+                          S{session.sessionId}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+              {reports.length === 0 && (
+                <p className="text-xs text-[#a8bfd4]/60 mt-2 text-center">
+                  Submit your first report to the World Council to begin tracking your progress!
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Sectors */}
               <div className="glass-panel p-4 md:col-span-1">
