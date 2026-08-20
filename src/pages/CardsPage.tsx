@@ -162,6 +162,24 @@ export default function CardsPage() {
           </div>
         )}
 
+        {/* Video: Students exploring cards */}
+        <div className="mb-6 rounded-2xl overflow-hidden border border-[#48d1cc]/30 shadow-lg shadow-[#48d1cc]/5 relative">
+          <div className="absolute top-3 left-3 z-10">
+            <span className="bg-black/50 backdrop-blur-sm text-[#48d1cc] text-xs font-bold px-3 py-1 rounded-full border border-[#48d1cc]/30">
+              INVESTIGATION IN ACTION
+            </span>
+          </div>
+          <video
+            src="/videos/cards-activity.mp4"
+            className="w-full h-48 md:h-72 object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+          <audio src="/videos/cards-ambient.mp3" autoPlay loop muted />
+        </div>
+
         {/* Category Filter */}
         <div className="mb-6 flex flex-wrap gap-2 justify-center">
           {CATEGORIES.map(cat => {
