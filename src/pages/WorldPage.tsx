@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams } from 'react-router'
+import { useParams, useNavigate } from 'react-router'
 import { trpc } from '@/providers/trpc'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -87,6 +87,14 @@ function useStaticData() {
 export default function WorldPage() {
   const { code } = useParams<{ code: string }>()
   const safeCode = code || 'NHI2026'
+  const navigate = useNavigate()
+
+  // Guard: only allow valid world code
+  useEffect(() => {
+    if (safeCode.toUpperCase() !== 'NHI2026') {
+      navigate('/', { replace: true })
+    }
+  }, [safeCode, navigate])
 
   // Always load static data immediately
   const staticData = useStaticData()

@@ -8,10 +8,15 @@ export default function LandingPage() {
   const navigate = useNavigate()
   const [joinCode, setJoinCode] = useState('')
   const [showJoin, setShowJoin] = useState(false)
+  const [joinError, setJoinError] = useState(false)
 
   const handleJoin = () => {
-    if (joinCode.trim()) {
-      navigate(`/world/${joinCode.trim().toUpperCase()}`)
+    const code = joinCode.trim().toUpperCase()
+    if (code === 'NHI2026') {
+      setJoinError(false)
+      navigate(`/world/${code}`)
+    } else {
+      setJoinError(true)
     }
   }
 
@@ -83,11 +88,11 @@ export default function LandingPage() {
           ) : (
             <div className="flex gap-2 animate-fade-in">
               <Input
-                placeholder="Enter world code"
+                placeholder="Ask your teacher for the login code"
                 value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value)}
+                onChange={(e) => { setJoinCode(e.target.value); setJoinError(false) }}
                 onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-                className="w-56 bg-[rgba(16,40,72,0.9)] border-[#48d1cc]/30 text-white placeholder:text-[#a8bfd4]/50 py-6"
+                className={`w-64 bg-[rgba(16,40,72,0.9)] border py-6 text-white placeholder:text-[#a8bfd4]/50 ${joinError ? 'border-red-500/60 ring-1 ring-red-500/30' : 'border-[#48d1cc]/30'}`}
                 autoFocus
               />
               <Button onClick={handleJoin} className="bg-[#48d1cc] hover:bg-[#3bc4bf] text-[#0a1628] font-bold px-4 py-6 rounded-xl">
@@ -147,8 +152,13 @@ export default function LandingPage() {
         <p className="mt-5 text-sm text-[#a8bfd4]/60">
           New to the project? Start with <span className="text-[#ffd166]">Introduction</span>
         </p>
+        {joinError && (
+          <p className="mt-2 text-sm text-red-400 font-medium animate-pulse">
+            Incorrect code. Ask your teacher for the login code.
+          </p>
+        )}
         <p className="mt-1 text-sm text-[#a8bfd4]/40">
-          World code: <span className="text-[#48d1cc] font-mono">NHI2026</span>
+          Students need the teacher login code to enter the world.
         </p>
       </div>
     </div>

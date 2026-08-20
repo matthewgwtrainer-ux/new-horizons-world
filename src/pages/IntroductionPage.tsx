@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   ArrowLeft, ArrowRight, Ship, Leaf, Cpu, BookOpen, AlertTriangle,
   Users, MapPin, Lightbulb, Scroll, Mic, FileText, Radio, Award,
@@ -82,6 +84,20 @@ export default function IntroductionPage() {
     isSupported, isPlaying, isPaused, currentSection, voices, selectedVoice,
     setSelectedVoice, rate, setRate, speakSections, pause, resume, stop
   } = useTextToSpeech()
+
+  const [joinCode, setJoinCode] = useState('')
+  const [joinError, setJoinError] = useState(false)
+
+  const handleJoin = () => {
+    const code = joinCode.trim().toUpperCase()
+    if (code === 'NHI2026') {
+      setJoinError(false)
+      stop()
+      navigate(`/world/${code}`)
+    } else {
+      setJoinError(true)
+    }
+  }
 
   const handlePlayAll = () => {
     speakSections(SPEECH_SECTIONS)
@@ -480,13 +496,28 @@ export default function IntroductionPage() {
           <div className="glass-panel p-8 md:p-10 inline-block w-full max-w-lg">
             <h2 className="text-2xl font-bold text-white mb-3">Ready to Begin?</h2>
             <p className="text-[#a8bfd4] mb-6">Your team is waiting. The island needs you. Can your English make New Horizon Island come alive?</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size="lg" onClick={() => { stop(); navigate('/world/NHI2026') }}
-                className="bg-[#48d1cc] hover:bg-[#3bc4bf] text-[#0a1628] font-bold px-8 py-6 text-lg rounded-xl">
-                Enter New Horizon Island <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex gap-2 w-full max-w-sm">
+                <Input
+                  placeholder="Ask your teacher for the login code"
+                  value={joinCode}
+                  onChange={(e) => { setJoinCode(e.target.value); setJoinError(false) }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                  className={`flex-1 bg-[rgba(16,40,72,0.9)] border py-5 text-white placeholder:text-[#a8bfd4]/50 ${joinError ? 'border-red-500/60 ring-1 ring-red-500/30' : 'border-[#48d1cc]/30'}`}
+                />
+                <Button onClick={handleJoin} className="bg-[#48d1cc] hover:bg-[#3bc4bf] text-[#0a1628] font-bold px-5 py-5 rounded-xl">
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </div>
+              {joinError && (
+                <p className="text-sm text-red-400 font-medium animate-pulse">
+                  Incorrect code. Ask your teacher for the login code.
+                </p>
+              )}
+              <p className="text-xs text-[#a8bfd4]/40">
+                Students need the teacher login code to enter the world.
+              </p>
             </div>
-            <p className="mt-4 text-sm text-[#a8bfd4]/60">World code: <span className="text-[#48d1cc] font-mono">NHI2026</span></p>
           </div>
         </section>
 

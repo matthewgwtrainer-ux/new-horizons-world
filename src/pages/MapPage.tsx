@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, MapPin, HelpCircle, AlertTriangle, Radio, Leaf, BookOpen, Ship, Cpu, Droplets, PawPrint, Scroll, Users, Anchor, Zap, Plus, Minus, RotateCcw, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowLeft, MapPin, HelpCircle, AlertTriangle, Radio, Leaf, BookOpen, Ship, Cpu, Droplets, PawPrint, Scroll, Users, Anchor, Zap, Plus, Minus, RotateCcw, Eye, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input';
 
 const MAP_LABELS = [
   // Sectors (large labels)
@@ -89,9 +90,21 @@ export default function MapPage() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [showLabels, setShowLabels] = useState(true);
+  const [joinCode, setJoinCode] = useState('');
+  const [joinError, setJoinError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
+
+  const handleJoin = () => {
+    const code = joinCode.trim().toUpperCase();
+    if (code === 'NHI2026') {
+      setJoinError(false);
+      navigate(`/world/${code}`);
+    } else {
+      setJoinError(true);
+    }
+  };
 
   const handleZoomIn = useCallback(() => {
     setZoom((z) => Math.min(z + ZOOM_STEP, MAX_ZOOM));
@@ -404,13 +417,31 @@ export default function MapPage() {
 
         {/* Footer */}
         <div className="text-center mt-8 pb-4">
-          <p className="text-[#a8bfd4] text-sm">World Code: <span className="text-[#48d1cc] font-mono font-bold">NHI2026</span></p>
-          <Button
-            onClick={() => navigate('/world/NHI2026')}
-            className="mt-4 bg-[#48d1cc] hover:bg-[#3dbdb8] text-[#0a1628] font-bold"
-          >
-            Enter the Island
-          </Button>
+          <div className="flex flex-col items-center gap-3 max-w-sm mx-auto">
+            <div className="flex gap-2 w-full">
+              <Input
+                placeholder="Ask your teacher for the login code"
+                value={joinCode}
+                onChange={(e) => { setJoinCode(e.target.value); setJoinError(false) }}
+                onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                className={`flex-1 bg-[rgba(16,40,72,0.9)] border py-5 text-white placeholder:text-[#a8bfd4]/50 ${joinError ? 'border-red-500/60 ring-1 ring-red-500/30' : 'border-[#48d1cc]/30'}`}
+              />
+              <Button
+                onClick={handleJoin}
+                className="bg-[#48d1cc] hover:bg-[#3dbdb8] text-[#0a1628] font-bold px-5"
+              >
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </div>
+            {joinError && (
+              <p className="text-sm text-red-400 font-medium animate-pulse">
+                Incorrect code. Ask your teacher for the login code.
+              </p>
+            )}
+            <p className="text-xs text-[#a8bfd4]/40">
+              Students need the teacher login code to enter the world.
+            </p>
+          </div>
         </div>
       </main>
     </div>
