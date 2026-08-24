@@ -90,7 +90,7 @@ export default function IntroductionPage() {
 
   const handleJoin = () => {
     const code = joinCode.trim().toUpperCase()
-    if (code === 'letmein') {
+    if (code === 'LETMEIN') {
       setJoinError(false)
       stop()
       navigate(`/world/${code}`)

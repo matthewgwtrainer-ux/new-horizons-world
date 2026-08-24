@@ -12,7 +12,7 @@ export default function LandingPage() {
 
   const handleJoin = () => {
     const code = joinCode.trim().toUpperCase()
-    if (code === 'letmein') {
+    if (code === 'LETMEIN') {
       setJoinError(false)
       navigate(`/world/${code}`)
     } else {
