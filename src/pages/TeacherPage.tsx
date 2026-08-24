@@ -29,7 +29,7 @@ export default function TeacherPage() {
   const [resetStatus, setResetStatus] = useState('')
 
   // tRPC queries
-  const worldQuery = trpc.world.getByCode.useQuery({ code: 'NHI2026' })
+  const worldQuery = trpc.world.getByCode.useQuery({ code: 'letmein' })
   const worldId = worldQuery.data?.id || staticWorld.id
 
   const sectorsQuery = trpc.sector.listByWorld.useQuery({ worldId }, { enabled: !!worldQuery.data })
@@ -142,7 +142,7 @@ export default function TeacherPage() {
             <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="text-[#a8bfd4] hover:text-white text-xs">
               <Home className="w-3.5 h-3.5 mr-1" /> Home
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/world/NHI2026')} className="text-[#48d1cc] hover:text-[#48d1cc] text-xs">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/world/letmein')} className="text-[#48d1cc] hover:text-[#48d1cc] text-xs">
               <GraduationCap className="w-3.5 h-3.5 mr-1" /> Student View
             </Button>
             <span className="text-sm text-[#a8bfd4] hidden sm:inline ml-2">Session:</span>

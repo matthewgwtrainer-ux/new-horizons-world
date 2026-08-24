@@ -80,7 +80,7 @@ export interface StaticWorld {
 export const staticWorld: StaticWorld = {
   id: 1,
   name: "New Horizon Island",
-  code: "NHI2026",
+  code: "letmein",
   tagline: "Can our English make an AI world come alive?",
   currentSession: 1,
   teacherPasscode: "worldcouncil",

@@ -86,12 +86,12 @@ function useStaticData() {
 
 export default function WorldPage() {
   const { code } = useParams<{ code: string }>()
-  const safeCode = code || 'NHI2026'
+  const safeCode = code || 'letmein'
   const navigate = useNavigate()
 
   // Guard: only allow valid world code
   useEffect(() => {
-    if (safeCode.toUpperCase() !== 'NHI2026') {
+    if (safeCode.toUpperCase() !== 'LETMEIN') {
       navigate('/', { replace: true })
     }
   }, [safeCode, navigate])

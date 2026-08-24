@@ -12,7 +12,7 @@ export default function LandingPage() {
 
   const handleJoin = () => {
     const code = joinCode.trim().toUpperCase()
-    if (code === 'NHI2026') {
+    if (code === 'letmein') {
       setJoinError(false)
       navigate(`/world/${code}`)
     } else {
@@ -122,7 +122,7 @@ export default function LandingPage() {
           <Button
             size="lg"
             variant="outline"
-            onClick={() => navigate('/teacher/NHI2026')}
+            onClick={() => navigate('/teacher/letmein')}
             className="border-[#48d1cc]/50 text-[#48d1cc] hover:bg-[#48d1cc]/10 px-6 py-6 text-base rounded-xl"
           >
             <Shield className="w-5 h-5 mr-2" />

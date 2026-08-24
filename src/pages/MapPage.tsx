@@ -117,7 +117,7 @@ export default function MapPage() {
 
   const handleJoin = () => {
     const code = joinCode.trim().toUpperCase();
-    if (code === 'NHI2026') {
+    if (code === 'letmein') {
       setJoinError(false);
       navigate(`/world/${code}`);
     } else {
