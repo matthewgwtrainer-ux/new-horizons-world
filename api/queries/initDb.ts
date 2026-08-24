@@ -110,7 +110,7 @@ DELETE FROM worlds;
 
 -- Insert world
 INSERT INTO worlds (name, code, tagline, current_session, teacher_passcode, mode)
-VALUES ('New Horizon Island', 'NHI2026', 'Can our English make an AI world come alive?', 1, 'worldcouncil', 'TEST');
+VALUES ('New Horizon Island', 'letmein', 'Can our English make an AI world come alive?', 1, 'worldcouncil', 'TEST');
 
 -- Insert sectors
 INSERT INTO sectors (world_id, sector_id, name, display_order, responsibility, locations, citizens, current_problem, mystery, status) VALUES
@@ -183,6 +183,12 @@ export async function initDatabase() {
     console.log("Database seeded with New Horizons World data");
   } else {
     console.log("Database already seeded, skipping");
+  }
+
+  // Migrate world code from old to new (idempotent)
+  const migrateResult = db.prepare("UPDATE worlds SET code = 'letmein' WHERE code = 'NHI2026'").run();
+  if (migrateResult.changes > 0) {
+    console.log("Migrated world code from NHI2026 to letmein");
   }
 
   db.close();
