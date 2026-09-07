@@ -292,13 +292,13 @@ ${profile?.speechStyle || "Use simple, clear English suitable for P6 students."}
             "Authorization": `Bearer ${KIMI_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "moonshot-v1-8k",
+            model: "kimi-k2.6",
             messages,
             temperature: 0.8,
             max_tokens: 300,
+   thinking: { type: "disabled" },
           }),
         });
-
         if (!res.ok) {
           const errorText = await res.text();
           console.error("Kimi API error:", errorText);
