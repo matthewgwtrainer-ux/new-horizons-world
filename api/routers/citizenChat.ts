@@ -294,7 +294,7 @@ ${profile?.speechStyle || "Use simple, clear English suitable for P6 students."}
           body: JSON.stringify({
             model: "kimi-k2.6",
             messages,
-            temperature: 0.8,
+            temperature: 0.6,
             max_tokens: 300,
    thinking: { type: "disabled" },
           }),
