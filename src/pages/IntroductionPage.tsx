@@ -486,6 +486,43 @@ export default function IntroductionPage() {
           </div>
         </section>
 
+        {/* ===== MEET THE CITIZENS — PORTRAIT GALLERY ===== */}
+        <section className="animate-slide-up mb-4">
+          <div className="glass-panel p-6 md:p-8">
+            <p className="text-center text-lg md:text-xl italic text-[#ffd166] mb-6 font-medium">
+              "These people hold the keys to the mystery...or do they?"
+            </p>
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-5">
+              {[
+                { name: 'Carlos Marin', src: '/citizens/carlos-marin.png', sector: 'Harbour' },
+                { name: 'Dr. Aria Green', src: '/citizens/aria-green.png', sector: 'Garden' },
+                { name: 'Kai Ocean', src: '/citizens/kai-ocean.png', sector: 'Garden' },
+                { name: 'Leo Walker', src: '/citizens/leo-walker.png', sector: 'Culture' },
+                { name: 'Malik Okafor', src: '/citizens/malik-okafor.png', sector: 'Tech' },
+                { name: 'Mei Lin', src: '/citizens/mei-lin.png', sector: 'Harbour' },
+                { name: 'Mira Lee', src: '/citizens/mira-lee.png', sector: 'Culture' },
+                { name: 'Nia Patel', src: '/citizens/nia-patel.png', sector: 'Garden' },
+                { name: 'Ren Sakai', src: '/citizens/ren-sakai.png', sector: 'Tech' },
+                { name: 'Sofia Cruz', src: '/citizens/sofia-cruz.png', sector: 'Culture' },
+                { name: 'Supply Robot 4', src: '/citizens/supply-robot-4.png', sector: 'Harbour' },
+                { name: 'Zara Kim', src: '/citizens/zara-kim.png', sector: 'Tech' },
+              ].map((citizen) => (
+                <div key={citizen.name} className="flex flex-col items-center text-center group">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-[#48d1cc]/30 group-hover:border-[#48d1cc]/70 transition-all shadow-lg shadow-[#48d1cc]/10">
+                    <img
+                      src={citizen.src}
+                      alt={citizen.name}
+                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <p className="mt-2 text-xs md:text-sm text-white font-medium leading-tight">{citizen.name}</p>
+                  <p className="text-[10px] md:text-xs text-[#48d1cc]/60 uppercase tracking-wide">{citizen.sector}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Banner: Ready to Begin */}
         <div className="rounded-2xl overflow-hidden mb-4 border border-[#48d1cc]/20">
           <img src="/intro-ready.jpg" alt="Ready to begin your adventure" className="w-full h-48 md:h-64 object-cover" />
