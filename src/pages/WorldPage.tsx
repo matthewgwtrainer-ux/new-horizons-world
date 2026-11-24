@@ -100,7 +100,11 @@ export default function WorldPage() {
   const staticData = useStaticData()
 
   // Try to fetch from backend (for cross-device sync when available)
-  const worldQuery = trpc.world.getByCode.useQuery({ code: safeCode })
+  // Force fresh fetch on every mount + poll every 3s so students stay in sync
+  const worldQuery = trpc.world.getByCode.useQuery(
+    { code: safeCode },
+    { refetchOnMount: 'always', staleTime: 0, refetchInterval: 3000 }
+  )
   const reportsQuery = trpc.report.listByWorld.useQuery(
     { worldId: staticData.world.id },
     { enabled: !!worldQuery.data, retry: 1 }
