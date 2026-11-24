@@ -119,7 +119,7 @@ export default function MapPage() {
     const code = joinCode.trim().toUpperCase();
     if (code === 'LETMEIN') {
       setJoinError(false);
-      navigate(`/world/${code}`);
+      navigate(`/world/${code.toLowerCase()}`);
     } else {
       setJoinError(true);
     }

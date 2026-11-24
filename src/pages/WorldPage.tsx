@@ -86,7 +86,7 @@ function useStaticData() {
 
 export default function WorldPage() {
   const { code } = useParams<{ code: string }>()
-  const safeCode = code || 'letmein'
+  const safeCode = (code || 'letmein').toLowerCase()
   const navigate = useNavigate()
 
   // Guard: only allow valid world code

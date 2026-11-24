@@ -93,7 +93,7 @@ export default function IntroductionPage() {
     if (code === 'LETMEIN') {
       setJoinError(false)
       stop()
-      navigate(`/world/${code}`)
+      navigate(`/world/${code.toLowerCase()}`)
     } else {
       setJoinError(true)
     }
